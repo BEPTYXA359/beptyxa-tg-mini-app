@@ -1,0 +1,42 @@
+name: Deploy Beptyxa Frontend to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          PROJECT_DIR: "/projects/${{ github.event.repository.name }}"
+          REPO_URL: "git@github.com:${{ github.repository }}.git"
+
+          SERVER_NAME: ${{ secrets.SERVER_NAME }}
+          BACKEND_CONTAINER_NAME: ${{ secrets.BACKEND_CONTAINER_NAME }}
+          BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          envs: PROJECT_DIR,REPO_URL,SERVER_NAME,BACKEND_CONTAINER_NAME,BACKEND_PORT
+          script: |
+            if [ ! -d "$PROJECT_DIR" ]; then
+              mkdir -p /projects
+              cd /projects
+              git clone $REPO_URL $(basename $PROJECT_DIR)
+            fi
+            
+            cd $PROJECT_DIR
+            git pull origin main
+            
+            echo "SERVER_NAME=$SERVER_NAME" > .env
+            echo "BACKEND_CONTAINER_NAME=$BACKEND_CONTAINER_NAME" >> .env
+            echo "BACKEND_PORT=$BACKEND_PORT" >> .env
+            
+            docker-compose up -d --build
+            
+            docker image prune -f
