@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, HashRouter } from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { AppRoot } from '@telegram-apps/telegram-ui';
 
 import '@telegram-apps/telegram-ui/dist/styles.css';
@@ -11,14 +11,14 @@ import { SettingsPage } from '@/pages/SettingsPage/SettingsPage';
 export const App: React.FC = () => {
   return (
     <AppRoot>
-      <HashRouter>
+      <BrowserRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AppRoot>
   );
 };
