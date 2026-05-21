@@ -65,7 +65,7 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: '80px' }}>
+      <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: 66 }}>
         <Section header="Грок и OpenAI">
           <Blockquote type="text" style={{ margin: '0 16px 16px' }}>
             Общайтесь с ИИ! Вы можете обратиться к бесплатной модели, начав сообщение со слова{' '}
