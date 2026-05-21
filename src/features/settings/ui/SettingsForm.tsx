@@ -11,6 +11,7 @@ import {
   Select,
   Textarea,
   Subheadline,
+  FixedLayout,
 } from '@telegram-apps/telegram-ui';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +31,7 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
     resolver: zodResolver(ChatSettingsSchema) as Resolver<ChatSettings>,
     defaultValues: {
       ...initialSettings,
-      chatterboxChance: Math.round((initialSettings.chatterboxChance || 0) * 100),
+      chatterboxChance: initialSettings.chatterboxChance || 0,
       openAiApiKey: '',
     },
   });
@@ -38,7 +39,6 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
   const onSubmit = (data: ChatSettings) => {
     const payload: Partial<ChatSettings> = {
       ...data,
-      chatterboxChance: data.chatterboxChance / 100,
     };
 
     if (!payload.openAiApiKey?.trim()) {
@@ -53,7 +53,14 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
   };
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    void handleSubmit(onSubmit)(e);
+    void handleSubmit(
+      (data) => {
+        onSubmit(data);
+      },
+      (err) => {
+        console.error('Ошибка сохранения настроек:', err);
+      },
+    )(e);
   };
 
   return (
@@ -170,18 +177,18 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
                   min={0}
                   max={100}
                   step={1}
-                  value={field.value}
+                  value={Math.round((field.value || 0) * 100)}
                   after={
                     <Subheadline level="2" weight="1">
-                      {field.value}%
+                      {Math.round((field.value || 0) * 100)}%
                     </Subheadline>
                   }
                   onChange={(e) => {
-                    const value =
+                    const sliderValue =
                       typeof e === 'number'
                         ? e
                         : Number((e as React.ChangeEvent<HTMLInputElement>).target.value);
-                    field.onChange(value);
+                    field.onChange(sliderValue / 100);
                   }}
                 />
               )}
@@ -191,16 +198,9 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
       </List>
 
       {isDirty && (
-        <div
+        <FixedLayout
           style={{
-            padding: '16px',
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'var(--tgui--secondary_bg_color)',
-            borderTop: '1px solid var(--tgui--separator_color)',
-            zIndex: 10,
+            padding: '8px 8px 90px 8px',
           }}
         >
           <Button
@@ -212,7 +212,7 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
           >
             Сохранить изменения
           </Button>
-        </div>
+        </FixedLayout>
       )}
     </form>
   );

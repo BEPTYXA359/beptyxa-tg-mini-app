@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner } from '@telegram-apps/telegram-ui';
+import { Spinner, Text } from '@telegram-apps/telegram-ui';
 import { useGetSettings, SettingsForm } from '@/features/settings';
 
 export const SettingsPage: React.FC = () => {
@@ -15,8 +15,10 @@ export const SettingsPage: React.FC = () => {
 
   if (isError) {
     return (
-      <div style={{ padding: 20, color: 'var(--tgui--destructive_text_color)' }}>
-        Ошибка загрузки настроек сервера.
+      <div
+        style={{ padding: 20, color: 'var(--tgui--destructive_text_color)', textAlign: 'center' }}
+      >
+        <Text weight="1">Ошибка загрузки настроек сервера.</Text>
       </div>
     );
   }
