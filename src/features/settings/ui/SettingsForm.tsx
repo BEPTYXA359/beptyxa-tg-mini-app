@@ -164,7 +164,13 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ init
           />
 
           <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '16px' }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              paddingBottom: '16px',
+              paddingTop: '16px',
+            }}
           >
             <Subheadline level="1" weight="3" style={{ padding: '0 24px' }}>
               Шанс срабатывания
