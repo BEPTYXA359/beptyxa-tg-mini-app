@@ -1,9 +1,13 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Spinner, Text } from '@telegram-apps/telegram-ui';
 import { useGetSettings, SettingsForm } from '@/features/settings';
 
 export const SettingsPage: React.FC = () => {
-  const { data: settings, isLoading, isError } = useGetSettings();
+  const [searchParams] = useSearchParams();
+  const chatId = searchParams.get('chat_id') || undefined;
+
+  const { data: settings, isLoading, isError } = useGetSettings(chatId);
 
   if (isLoading) {
     return (
@@ -24,5 +28,5 @@ export const SettingsPage: React.FC = () => {
   }
   if (!settings) return null;
 
-  return <SettingsForm initialSettings={settings} />;
+  return <SettingsForm initialSettings={settings} chatId={chatId} />;
 };

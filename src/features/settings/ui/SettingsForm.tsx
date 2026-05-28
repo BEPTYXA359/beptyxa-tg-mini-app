@@ -19,8 +19,11 @@ import { useUpdateSettings } from '../hooks/useUpdateSettings';
 import { type ChatSettings, ChatSettingsSchema } from '../model/settings.schema';
 import { Save } from 'lucide-react';
 
-export const SettingsForm: React.FC<{ initialSettings: ChatSettings }> = ({ initialSettings }) => {
-  const { mutate: updateSettings, isPending } = useUpdateSettings();
+export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: string }> = ({
+  initialSettings,
+  chatId,
+}) => {
+  const { mutate: updateSettings, isPending } = useUpdateSettings(chatId);
 
   const {
     control,
