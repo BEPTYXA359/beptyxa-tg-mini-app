@@ -1,11 +1,10 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { Spinner, Text } from '@telegram-apps/telegram-ui';
 import { useGetSettings, SettingsForm } from '@/features/settings';
+import { getChatId } from '@/shared/utils/telegram.util.ts';
 
 export const SettingsPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const chatId = searchParams.get('chat_id') || undefined;
+  const chatId = getChatId();
 
   const { data: settings, isLoading, isError } = useGetSettings(chatId);
 
