@@ -66,6 +66,16 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: st
     )(e);
   };
 
+  const rawModels: string[] = initialSettings?.availableModels ?? [];
+  const modelsOptions = rawModels.map((modelId) => ({
+    label: modelId,
+    value: modelId,
+  }));
+  const hasModels = modelsOptions.length > 0;
+  const selectPlaceholder = hasModels
+    ? 'Выберите модель'
+    : 'Нет доступных моделей (проверьте API-ключ)';
+
   return (
     <form onSubmit={handleFormSubmit}>
       <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: 66 }}>
@@ -124,8 +134,18 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: st
             name="openAiModel"
             control={control}
             render={({ field }) => (
-              <Select header="Модель OpenAI" {...field} disabled>
-                <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <Select header="Модель OpenAI" {...field} disabled={!hasModels || field.disabled}>
+                {!hasModels && (
+                  <option value="" disabled hidden>
+                    {selectPlaceholder}
+                  </option>
+                )}
+
+                {modelsOptions.map((model) => (
+                  <option value={model.value} key={model.value}>
+                    {model.label}
+                  </option>
+                ))}
               </Select>
             )}
           />
