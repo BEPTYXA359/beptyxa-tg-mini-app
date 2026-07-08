@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Tabbar } from '@telegram-apps/telegram-ui';
 import { Home, Settings } from 'lucide-react';
-import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
 
 interface TabConfig {
   id: string;
@@ -19,8 +18,6 @@ const TABS: TabConfig[] = [
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  useTelegramBackButton();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>

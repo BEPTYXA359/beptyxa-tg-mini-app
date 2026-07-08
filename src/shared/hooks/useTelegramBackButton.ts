@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { backButton } from '@telegram-apps/sdk-react';
 
-export const useTelegramBackButton = () => {
+export const useTelegramBackButton = (onCustomBack?: () => void) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,7 +16,11 @@ export const useTelegramBackButton = () => {
     }
 
     const handleBackClick = () => {
-      void navigate(-1);
+      if (onCustomBack) {
+        onCustomBack();
+      } else {
+        void navigate(-1);
+      }
     };
 
     backButton.onClick(handleBackClick);
@@ -24,5 +28,5 @@ export const useTelegramBackButton = () => {
     return () => {
       backButton.offClick(handleBackClick);
     };
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, onCustomBack]);
 };

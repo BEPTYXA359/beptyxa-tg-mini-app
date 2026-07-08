@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/api.client';
 import type { ChatSettings, UpdateSettingsResponse } from '../model/settings.schema';
 
-export const useUpdateSettings = (chatId?: string) => {
+export const useUpdateSettings = (chatId?: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({

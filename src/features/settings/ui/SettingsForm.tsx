@@ -19,7 +19,7 @@ import { useUpdateSettings } from '../hooks/useUpdateSettings';
 import { type ChatSettings, ChatSettingsSchema } from '../model/settings.schema';
 import { Save } from 'lucide-react';
 
-export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: string }> = ({
+export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: number }> = ({
   initialSettings,
   chatId,
 }) => {
@@ -55,17 +55,6 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: st
     });
   };
 
-  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    void handleSubmit(
-      (data) => {
-        onSubmit(data);
-      },
-      (err) => {
-        console.error('Ошибка сохранения настроек:', err);
-      },
-    )(e);
-  };
-
   const rawModels: string[] = initialSettings?.availableModels ?? [];
   const modelsOptions = rawModels.map((modelId) => ({
     label: modelId,
@@ -77,7 +66,7 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: st
     : 'Нет доступных моделей (проверьте API-ключ)';
 
   return (
-    <form onSubmit={handleFormSubmit}>
+    <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
       <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: 66 }}>
         <Section header="Грок и OpenAI">
           <Blockquote type="text" style={{ margin: '0 16px 16px' }}>

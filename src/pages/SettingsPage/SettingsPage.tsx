@@ -1,9 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Spinner, Text } from '@telegram-apps/telegram-ui';
 import { useGetSettings, SettingsForm } from '@/features/settings';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
+import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
 
 export const SettingsPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  useTelegramBackButton(() => {
+    void navigate('/');
+  });
+
   const chatId = getChatId();
 
   const { data: settings, isLoading, isError } = useGetSettings(chatId);
