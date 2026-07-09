@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateSettings } from '../hooks/useUpdateSettings';
 import { type ChatSettings, ChatSettingsSchema } from '../model/settings.schema';
 import { Save } from 'lucide-react';
+import { getIsGroupChat } from '@/shared/utils/telegram.util.ts';
 
 export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: number }> = ({
   initialSettings,
@@ -95,20 +96,22 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
             )}
           />
 
-          <Controller
-            name="isStreamingEnabled"
-            control={control}
-            render={({ field }) => (
-              <Cell
-                Component="label"
-                after={
-                  <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
-                }
-              >
-                Потоковый ответ (streaming)
-              </Cell>
-            )}
-          />
+          {!getIsGroupChat() && (
+            <Controller
+              name="isStreamingEnabled"
+              control={control}
+              render={({ field }) => (
+                <Cell
+                  Component="label"
+                  after={
+                    <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
+                  }
+                >
+                  Потоковый ответ (streaming)
+                </Cell>
+              )}
+            />
+          )}
 
           <Controller
             name="isOpenAiEnabled"
