@@ -66,7 +66,11 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
     : 'Нет доступных моделей (проверьте API-ключ)';
 
   return (
-    <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}>
+    <form
+      onSubmit={(e) => {
+        void handleSubmit(onSubmit)(e);
+      }}
+    >
       <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: 66 }}>
         <Section header="Грок и OpenAI">
           <Blockquote type="text" style={{ margin: '0 16px 16px' }}>
@@ -88,6 +92,21 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
                 placeholder="Ты полезный ассистент."
                 value={field.value || ''}
               />
+            )}
+          />
+
+          <Controller
+            name="isStreamingEnabled"
+            control={control}
+            render={({ field }) => (
+              <Cell
+                Component="label"
+                after={
+                  <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
+                }
+              >
+                Потоковый ответ (streaming)
+              </Cell>
             )}
           />
 

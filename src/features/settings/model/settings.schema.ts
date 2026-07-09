@@ -7,6 +7,7 @@ export const ChatSettingsSchema = z.object({
   openAiApiKey: z.string().optional(),
   llmSystemPrompt: z.string().optional().nullable(),
   chatterboxSystemPrompt: z.string().optional().nullable(),
+  isStreamingEnabled: z.boolean().default(false),
   openAiModel: z.string().default('gpt-4o-mini'),
   chatterboxChance: z.number().min(0).max(1).default(0.02),
   availableModels: z.string().array(),
