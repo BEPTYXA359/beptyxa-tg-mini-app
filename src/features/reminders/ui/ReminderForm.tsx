@@ -9,6 +9,8 @@ import {
   List,
   FixedLayout,
   Textarea,
+  Cell,
+  Switch,
 } from '@telegram-apps/telegram-ui';
 import {
   type CreateReminderInput,
@@ -40,6 +42,8 @@ const convertIsoToDateTimeLocal = (isoString: string): string => {
   return `${today}T${hours}:${minutes}`;
 };
 
+const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFormSubmit }) => {
   const isEditMode = !!reminderToEdit;
 
@@ -57,6 +61,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
       frequency: 'once',
       time: getInitialDateTimeLocal(),
       specificDays: [],
+      silent: false,
     },
   });
 
@@ -73,9 +78,10 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
             ? convertIsoToDateTimeLocal(reminderToEdit.time)
             : reminderToEdit.time,
         specificDays: reminderToEdit.specificDays || [],
+        silent: reminderToEdit.silent === true,
       });
     } else {
-      reset({ message: '', frequency: 'once', time: getInitialDateTimeLocal(), specificDays: [] });
+      reset({ message: '', frequency: 'once', time: getInitialDateTimeLocal(), specificDays: [], silent: false });
     }
   }, [reminderToEdit, reset]);
 
@@ -124,6 +130,8 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         ...data,
         time: data.frequency === 'once' ? new Date(data.time).toISOString() : data.time,
         specificDays: data.frequency === 'specific_days' ? data.specificDays : undefined,
+        timezone: userTimezone,
+        silent: data.silent === true,
       };
 
       await onFormSubmit(payload, reminderToEdit?._id);
@@ -188,6 +196,21 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         {currentFrequency === 'specific_days' && (
           <DaysOfWeekPicker selectedDays={currentSpecificDays} onToggle={handleDayToggle} />
         )}
+
+        <Controller
+          name="silent"
+          control={control}
+          render={({ field }) => (
+            <Cell
+              Component="label"
+              after={
+                <Switch checked={!!field.value} onChange={field.onChange} />
+              }
+            >
+              Не упоминать в чате
+            </Cell>
+          )}
+        />
       </List>
 
       <FixedLayout vertical="bottom" style={{ padding: '8px 8px 90px 8px' }}>

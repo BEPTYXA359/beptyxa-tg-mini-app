@@ -22,6 +22,8 @@ export interface Reminder {
   frequency: FrequencyType;
   time: string;
   specificDays?: number[];
+  timezone?: string;
+  silent?: boolean;
   createdAt: string;
 }
 
@@ -30,6 +32,8 @@ export const createReminderSchema = z.object({
   frequency: z.enum(['once', 'daily', 'every_other_day', 'specific_days'] as const),
   time: z.string().min(1, 'Выберите время'),
   specificDays: z.array(z.number().min(0).max(6)).optional(),
+  timezone: z.string().optional(),
+  silent: z.boolean().optional(),
 });
 
 export type CreateReminderInput = z.infer<typeof createReminderSchema>;
