@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List } from '@telegram-apps/telegram-ui';
 import { RemindersWidget } from '@/features/reminders/ui/RemindersWidget.tsx';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
@@ -16,8 +15,8 @@ export const HomePage: React.FC = () => {
   const { data: reminders = [] } = useGetReminders(chatId);
 
   return (
-    <List style={{ padding: '8px 12px 66px 12px' }}>
-      <RemindersWidget activeCount={reminders.length} onClick={() => void navigate(`/reminders`)} />
-    </List>
+    <div style={{ paddingInline: 'var(--vkui--size_base_padding_horizontal--regular)' }}>
+      <RemindersWidget reminders={reminders} onClick={() => void navigate(`/reminders`)} />
+    </div>
   );
 };

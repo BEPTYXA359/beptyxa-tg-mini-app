@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Spinner, Text } from '@telegram-apps/telegram-ui';
+import { Group, Placeholder } from '@vkontakte/vkui';
 import { useGetSettings, SettingsForm } from '@/features/settings';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
+import { SettingsSkeleton } from '@/shared/ui/Skeleton/SettingsSkeleton.tsx';
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,22 +18,17 @@ export const SettingsPage: React.FC = () => {
   const { data: settings, isLoading, isError } = useGetSettings(chatId);
 
   if (isLoading) {
-    return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <Spinner size="l" />
-      </div>
-    );
+    return <SettingsSkeleton />;
   }
 
   if (isError) {
     return (
-      <div
-        style={{ padding: 20, color: 'var(--tgui--destructive_text_color)', textAlign: 'center' }}
-      >
-        <Text weight="1">Ошибка загрузки настроек сервера.</Text>
-      </div>
+      <Group>
+        <Placeholder title="Ошибка">Не удалось загрузить настройки сервера.</Placeholder>
+      </Group>
     );
   }
+
   if (!settings) return null;
 
   return <SettingsForm initialSettings={settings} chatId={chatId} />;

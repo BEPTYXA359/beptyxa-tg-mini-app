@@ -6,7 +6,6 @@ export function useDeleteReminders(chatId?: number) {
 
   return useMutation<void, Error, string>({
     mutationFn: async (reminderId) => {
-      console.log('reminderId', reminderId);
       await apiClient.delete(`/reminders/${reminderId}`, {
         params: chatId ? { chatId } : {},
       });

@@ -2,16 +2,16 @@ import React, { useEffect } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Input,
-  Select,
   Button,
-  Section,
-  List,
-  FixedLayout,
-  Textarea,
-  Cell,
+  CustomSelect,
+  FormItem,
+  Group,
+  Header,
+  Input,
+  SimpleCell,
   Switch,
-} from '@telegram-apps/telegram-ui';
+  Textarea,
+} from '@vkontakte/vkui';
 import {
   type CreateReminderInput,
   createReminderSchema,
@@ -20,10 +20,16 @@ import {
 } from '../model/reminders.types';
 import { Save } from 'lucide-react';
 import { DaysOfWeekPicker } from '@/features/reminders/ui/DaysOfWeekPicker.tsx';
+import { haptic } from '@/shared/utils/haptic.util';
+import {
+  BottomActionBar,
+  BOTTOM_BAR_CLEARANCE,
+} from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
 
 interface ReminderFormProps {
   reminderToEdit: Reminder | null;
   onFormSubmit: (data: CreateReminderInput, id?: string) => Promise<void>;
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const getInitialDateTimeLocal = (): string => {
@@ -44,7 +50,7 @@ const convertIsoToDateTimeLocal = (isoString: string): string => {
 
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFormSubmit }) => {
+export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFormSubmit, onDirtyChange }) => {
   const isEditMode = !!reminderToEdit;
 
   const {
@@ -53,7 +59,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
     setValue,
     getValues,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<CreateReminderInput>({
     resolver: zodResolver(createReminderSchema),
     defaultValues: {
@@ -67,6 +73,10 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
 
   const currentFrequency = useWatch({ control, name: 'frequency' });
   const currentSpecificDays = useWatch({ control, name: 'specificDays' }) || [];
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   useEffect(() => {
     if (reminderToEdit) {
@@ -146,18 +156,19 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         void handleSubmit(onSubmit)(e);
       }}
     >
-      <List style={{ paddingBottom: 66 }}>
-        <Section header={isEditMode ? 'Редактирование напоминания' : 'Параметры напоминания'}>
+      <div style={{ paddingBottom: BOTTOM_BAR_CLEARANCE }}>
+        <Group mode="card" header={<Header>{isEditMode ? 'Редактирование' : 'Параметры'}</Header>}>
           <Controller
             name="message"
             control={control}
             render={({ field }) => (
-              <Textarea
-                {...field}
-                header="Что напомнить"
-                placeholder="Введите текст сообщения..."
-                status={errors.message ? 'error' : undefined}
-              />
+              <FormItem
+                top="Что напомнить"
+                status={errors.message ? 'error' : 'default'}
+                bottom={errors.message?.message}
+              >
+                <Textarea {...field} placeholder="Введите текст сообщения..." value={field.value || ''} />
+              </FormItem>
             )}
           />
 
@@ -165,16 +176,19 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
             name="frequency"
             control={control}
             render={({ field }) => (
-              <Select
-                {...field}
-                header="Периодичность"
-                onChange={(e) => handleFrequencyChange(e, field.onChange)}
-              >
-                <option value="once">Один раз</option>
-                <option value="daily">Каждый день</option>
-                <option value="every_other_day">Через день</option>
-                <option value="specific_days">По выбранным дням</option>
-              </Select>
+              <FormItem top="Периодичность">
+                <CustomSelect
+                  value={field.value}
+                  name={field.name}
+                  onChange={(e) => handleFrequencyChange(e, field.onChange)}
+                  options={[
+                    { value: 'once', label: 'Один раз' },
+                    { value: 'daily', label: 'Каждый день' },
+                    { value: 'every_other_day', label: 'Через день' },
+                    { value: 'specific_days', label: 'По выбранным дням' },
+                  ]}
+                />
+              </FormItem>
             )}
           />
 
@@ -182,48 +196,59 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
             name="time"
             control={control}
             render={({ field }) => (
-              <Input
-                key={currentFrequency === 'once' ? 'datetime-node-stable' : 'time-node-stable'}
-                {...field}
-                header="Время"
-                type={currentFrequency === 'once' ? 'datetime-local' : 'time'}
-                status={errors.time ? 'error' : undefined}
-              />
+              <FormItem
+                top="Время"
+                status={errors.time ? 'error' : 'default'}
+                bottom={errors.time?.message}
+              >
+                <Input
+                  key={currentFrequency === 'once' ? 'datetime-node-stable' : 'time-node-stable'}
+                  {...field}
+                  type={currentFrequency === 'once' ? 'datetime-local' : 'time'}
+                />
+              </FormItem>
             )}
           />
-        </Section>
+        </Group>
 
         {currentFrequency === 'specific_days' && (
           <DaysOfWeekPicker selectedDays={currentSpecificDays} onToggle={handleDayToggle} />
         )}
 
-        <Controller
-          name="silent"
-          control={control}
-          render={({ field }) => (
-            <Cell
-              Component="label"
-              after={
-                <Switch checked={!!field.value} onChange={field.onChange} />
-              }
-            >
-              Не упоминать в чате
-            </Cell>
-          )}
-        />
-      </List>
+        <Group mode="card">
+          <Controller
+            name="silent"
+            control={control}
+            render={({ field }) => (
+              <SimpleCell
+                after={
+                  <span style={{ pointerEvents: 'none' }}>
+                    <Switch checked={!!field.value} />
+                  </span>
+                }
+                onClick={() => {
+                  haptic.impact('light');
+                  field.onChange(!field.value);
+                }}
+              >
+                Не упоминать в чате
+              </SimpleCell>
+            )}
+          />
+        </Group>
+      </div>
 
-      <FixedLayout vertical="bottom" style={{ padding: '8px 8px 90px 8px' }}>
+      <BottomActionBar>
         <Button
           size="l"
           stretched
           loading={isSubmitting}
           type="submit"
-          before={<Save size={16} color="var(--tgui--button_text_color)" />}
+          before={<Save size={16} />}
         >
           {isEditMode ? 'Сохранить изменения' : 'Создать'}
         </Button>
-      </FixedLayout>
+      </BottomActionBar>
     </form>
   );
 };

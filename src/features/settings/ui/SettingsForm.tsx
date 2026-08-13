@@ -1,29 +1,66 @@
 import React from 'react';
 import {
-  Section,
-  Switch,
-  List,
-  Cell,
-  Blockquote,
-  Input,
+  Banner,
   Button,
+  CustomSelect,
+  FormItem,
+  Group,
+  Header,
+  Input,
+  SimpleCell,
   Slider,
-  Select,
+  Subhead,
+  Switch,
   Textarea,
-  Subheadline,
-  FixedLayout,
-} from '@telegram-apps/telegram-ui';
-import { useForm, Controller, type Resolver } from 'react-hook-form';
+} from '@vkontakte/vkui';
+import { useForm, Controller, type Resolver, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateSettings } from '../hooks/useUpdateSettings';
 import { type ChatSettings, ChatSettingsSchema } from '../model/settings.schema';
 import { Save } from 'lucide-react';
 import { getIsGroupChat } from '@/shared/utils/telegram.util.ts';
+import { haptic } from '@/shared/utils/haptic.util';
+import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
+import {
+  BottomActionBar,
+  BOTTOM_BAR_CLEARANCE,
+  TABBAR_OFFSET,
+} from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
+
+const ToggleCell: React.FC<{
+  control: Control<ChatSettings>;
+  name: keyof ChatSettings;
+  label: string;
+  disabled?: boolean;
+}> = ({ control, name, label, disabled }) => (
+  <Controller
+    name={name}
+    control={control}
+    render={({ field }) => (
+      <SimpleCell
+        disabled={disabled}
+        after={
+          <span style={{ pointerEvents: 'none' }}>
+            <Switch checked={!!field.value} disabled={disabled} />
+          </span>
+        }
+        onClick={() => {
+          if (disabled) return;
+          haptic.impact('light');
+          field.onChange(!field.value);
+        }}
+      >
+        {label}
+      </SimpleCell>
+    )}
+  />
+);
 
 export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: number }> = ({
   initialSettings,
   chatId,
 }) => {
+  const feedback = useFeedback();
   const { mutate: updateSettings, isPending } = useUpdateSettings(chatId);
 
   const {
@@ -41,9 +78,7 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
   });
 
   const onSubmit = (data: ChatSettings) => {
-    const payload: Partial<ChatSettings> = {
-      ...data,
-    };
+    const payload: Partial<ChatSettings> = { ...data };
 
     if (!payload.openAiApiKey?.trim()) {
       delete payload.openAiApiKey;
@@ -51,16 +86,19 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
 
     updateSettings(payload, {
       onSuccess: () => {
+        feedback.success('Настройки сохранены');
         reset({ ...data, openAiApiKey: '' });
+      },
+      onError: () => {
+        feedback.error('Не удалось сохранить настройки');
       },
     });
   };
 
   const rawModels: string[] = initialSettings?.availableModels ?? [];
-  const modelsOptions = rawModels.map((modelId) => ({
-    label: modelId,
-    value: modelId,
-  }));
+  const modelsOptions: { value: string; label: string; disabled?: boolean }[] = rawModels.map(
+    (modelId) => ({ label: modelId, value: modelId }),
+  );
   const hasModels = modelsOptions.length > 0;
   const selectPlaceholder = hasModels
     ? 'Выберите модель'
@@ -72,72 +110,48 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
         void handleSubmit(onSubmit)(e);
       }}
     >
-      <List style={{ background: 'var(--tgui--secondary_bg_color)', paddingBottom: 66 }}>
-        <Section header="Грок и OpenAI">
-          <Blockquote type="text" style={{ margin: '0 16px 16px' }}>
-            Общайтесь с ИИ! Вы можете обратиться к бесплатной модели, начав сообщение со слова{' '}
-            <b>«грок ...»</b>.
-            <br />
-            <br />
-            Для использования более мощной модели укажите ваш API-ключ OpenAI, включите тумблер ниже
-            и начинайте запрос со слова <b>«чатгпт ...»</b>.
-          </Blockquote>
+      <div style={{ paddingBottom: isDirty ? BOTTOM_BAR_CLEARANCE : TABBAR_OFFSET }}>
+        <Group mode="card" header={<Header>Грок и OpenAI</Header>}>
+          <div style={{ padding: '0 4px 12px' }}>
+            <Banner
+              mode="tint"
+              subtitle={
+                <>
+                  Общайтесь с ИИ! Бесплатная модель — начните сообщение со слова{' '}
+                  <b>«грок ...»</b>. Для мощной модели укажите API-ключ OpenAI, включите тумблер и
+                  используйте <b>«чатгпт ...»</b>.
+                </>
+              }
+            />
+          </div>
 
           <Controller
             name="llmSystemPrompt"
             control={control}
             render={({ field }) => (
-              <Textarea
-                {...field}
-                header="Системный промпт (LLM)"
-                placeholder="Ты полезный ассистент."
-                value={field.value || ''}
-              />
+              <FormItem top="Системный промпт (LLM)">
+                <Textarea {...field} placeholder="Ты полезный ассистент." value={field.value || ''} />
+              </FormItem>
             )}
           />
 
           {!getIsGroupChat() && (
-            <Controller
-              name="isStreamingEnabled"
-              control={control}
-              render={({ field }) => (
-                <Cell
-                  Component="label"
-                  after={
-                    <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
-                  }
-                >
-                  Потоковый ответ (streaming)
-                </Cell>
-              )}
-            />
+            <ToggleCell control={control} name="isStreamingEnabled" label="Потоковый ответ (streaming)" disabled={isPending} />
           )}
 
-          <Controller
-            name="isOpenAiEnabled"
-            control={control}
-            render={({ field }) => (
-              <Cell
-                Component="label"
-                after={
-                  <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
-                }
-              >
-                Использовать OpenAI
-              </Cell>
-            )}
-          />
+          <ToggleCell control={control} name="isOpenAiEnabled" label="Использовать OpenAI" disabled={isPending} />
 
           <Controller
             name="openAiApiKey"
             control={control}
             render={({ field }) => (
-              <Input
-                {...field}
-                header="API Ключ OpenAI"
-                placeholder={initialSettings?.hasOpenAiApiKey ? '●●●●●●●●●●●●●●●●' : 'sk-...'}
-                type="password"
-              />
+              <FormItem top="API Ключ OpenAI">
+                <Input
+                  {...field}
+                  placeholder={initialSettings?.hasOpenAiApiKey ? '●●●●●●●●●●●●●●●●' : 'sk-...'}
+                  type="password"
+                />
+              </FormItem>
             )}
           />
 
@@ -145,114 +159,78 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
             name="openAiModel"
             control={control}
             render={({ field }) => (
-              <Select header="Модель OpenAI" {...field} disabled={!hasModels || field.disabled}>
-                {!hasModels && (
-                  <option value="" disabled hidden>
-                    {selectPlaceholder}
-                  </option>
-                )}
-
-                {modelsOptions.map((model) => (
-                  <option value={model.value} key={model.value}>
-                    {model.label}
-                  </option>
-                ))}
-              </Select>
+              <FormItem top="Модель OpenAI">
+                <CustomSelect
+                  value={field.value}
+                  name={field.name}
+                  onChange={field.onChange}
+                  disabled={!hasModels}
+                  placeholder={selectPlaceholder}
+                  options={
+                    hasModels
+                      ? modelsOptions
+                      : [{ value: '', label: selectPlaceholder, disabled: true }]
+                  }
+                />
+              </FormItem>
             )}
           />
-        </Section>
+        </Group>
 
-        <Section header="Балабол">
-          <Blockquote type="text" style={{ margin: '0 16px 16px' }}>
-            «Балабол» — это режим, при котором ассистент спонтанно участвует в беседах чата от
-            своего имени. Вы можете настроить вероятность его срабатывания (в процентах) и задать
-            уникальный характер общения.
-          </Blockquote>
+        <Group mode="card" header={<Header>Балабол</Header>}>
+          <div style={{ padding: '0 4px 12px' }}>
+            <Banner
+              mode="tint"
+              subtitle={
+                <>
+                  «Балабол» — режим, при котором ассистент спонтанно участвует в беседах чата.
+                  Настройте вероятность срабатывания и характер общения.
+                </>
+              }
+            />
+          </div>
 
-          <Controller
-            name="isChatterboxEnabled"
-            control={control}
-            render={({ field }) => (
-              <Cell
-                Component="label"
-                after={
-                  <Switch checked={field.value} onChange={field.onChange} disabled={isPending} />
-                }
-              >
-                Включить Балабола
-              </Cell>
-            )}
-          />
+          <ToggleCell control={control} name="isChatterboxEnabled" label="Включить Балабола" disabled={isPending} />
 
           <Controller
             name="chatterboxSystemPrompt"
             control={control}
             render={({ field }) => (
-              <Textarea
-                {...field}
-                header="Характер (Системный промпт)"
-                placeholder="Ты саркастичный участник чата."
-                value={field.value || ''}
-              />
+              <FormItem top="Характер (Системный промпт)">
+                <Textarea {...field} placeholder="Ты саркастичный участник чата." value={field.value || ''} />
+              </FormItem>
             )}
           />
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              paddingBottom: '16px',
-              paddingTop: '16px',
-            }}
-          >
-            <Subheadline level="1" weight="3" style={{ padding: '0 24px' }}>
-              Шанс срабатывания
-            </Subheadline>
-            <Controller
-              name="chatterboxChance"
-              control={control}
-              render={({ field }) => (
-                <Slider
-                  min={0}
-                  max={100}
-                  step={1}
-                  value={Math.round((field.value || 0) * 100)}
-                  after={
-                    <Subheadline level="2" weight="1">
-                      {Math.round((field.value || 0) * 100)}%
-                    </Subheadline>
-                  }
-                  onChange={(e) => {
-                    const sliderValue =
-                      typeof e === 'number'
-                        ? e
-                        : Number((e as React.ChangeEvent<HTMLInputElement>).target.value);
-                    field.onChange(sliderValue / 100);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </Section>
-      </List>
+          <Controller
+            name="chatterboxChance"
+            control={control}
+            render={({ field }) => (
+              <FormItem top="Шанс срабатывания">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <Subhead weight="2">{Math.round((field.value || 0) * 100)}%</Subhead>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={Math.round((field.value || 0) * 100)}
+                    onChange={(value) => {
+                      field.onChange(value / 100);
+                    }}
+                  />
+                </div>
+              </FormItem>
+            )}
+          />
+        </Group>
+      </div>
 
       {isDirty && (
-        <FixedLayout
-          style={{
-            padding: '8px 8px 90px 8px',
-          }}
-        >
-          <Button
-            size="l"
-            stretched
-            loading={isPending}
-            type="submit"
-            before={<Save size={16} color="var(--tgui--button_text_color)" />}
-          >
+        <BottomActionBar>
+          <Button size="l" stretched loading={isPending} type="submit" before={<Save size={16} />}>
             Сохранить изменения
           </Button>
-        </FixedLayout>
+        </BottomActionBar>
       )}
     </form>
   );
