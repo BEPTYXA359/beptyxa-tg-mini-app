@@ -1,0 +1,10 @@
+/*
+ * VKUI на мобильной ширине обнуляет верхние углы у первой карточки-группы
+ * (рассчитывая, что она пристыкована к хедеру панели). Наши карточки
+ * отделены отступами, поэтому возвращаем скругление.
+ */
+.vkuiGroup__viewWidthSmallTabletMinus.vkuiGroup__modeCard:first-of-type,
+.vkuiGroup__viewWidthNone.vkuiGroup__modeCard:first-of-type {
+  border-top-left-radius: var(--vkui--size_border_radius_promo--regular);
+  border-top-right-radius: var(--vkui--size_border_radius_promo--regular);
+}
