@@ -41,7 +41,7 @@ export const RemindersPage: React.FC = () => {
     }
   }, [refetch]);
 
-  const handleOpenEdit = (reminder: Reminder) => {
+  const handleOpenReminder = (reminder: Reminder) => {
     void navigate('/reminders/form', { state: { reminder } });
   };
 
@@ -96,7 +96,8 @@ export const RemindersPage: React.FC = () => {
           <RemindersList
             items={reminders}
             onDelete={handleDelete}
-            onEdit={handleOpenEdit}
+            onEdit={handleOpenReminder}
+            onView={handleOpenReminder}
             onCreate={() => void navigate('/reminders/form')}
           />
         </PullToRefresh>

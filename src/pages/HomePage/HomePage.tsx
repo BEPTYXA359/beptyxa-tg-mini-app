@@ -14,9 +14,5 @@ export const HomePage: React.FC = () => {
 
   const { data: reminders = [] } = useGetReminders(chatId);
 
-  return (
-    <div style={{ paddingInline: 'var(--vkui--size_base_padding_horizontal--regular)' }}>
-      <RemindersWidget reminders={reminders} onClick={() => void navigate(`/reminders`)} />
-    </div>
-  );
+  return <RemindersWidget reminders={reminders} onClick={() => void navigate(`/reminders`)} />;
 };

@@ -12,6 +12,14 @@ export const DAYS_OF_WEEK = [
 
 export type FrequencyType = 'once' | 'daily' | 'every_other_day' | 'specific_days';
 
+export type ReminderKind = 'regular' | 'steam_release';
+
+export interface SteamSubscriber {
+  id: number;
+  firstName: string;
+  username?: string;
+}
+
 export interface Reminder {
   _id: string;
   chatId: number;
@@ -24,6 +32,10 @@ export interface Reminder {
   specificDays?: number[];
   timezone?: string;
   silent?: boolean;
+  kind?: ReminderKind;
+  steamAppId?: string;
+  gameName?: string;
+  subscribers?: SteamSubscriber[];
   createdAt: string;
 }
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Group, Header, IconButton, Placeholder, SimpleCell, Button } from '@vkontakte/vkui';
-import { Trash } from 'lucide-react';
+import { Avatar, Group, Header, IconButton, Placeholder, SimpleCell, Button } from '@vkontakte/vkui';
+import { Bell, Gamepad2, Trash } from 'lucide-react';
 import type { Reminder } from '@/features/reminders/model/reminders.types.ts';
 import { getNextFireDate, getNextFireLabel } from '../utils/nextFire';
 
@@ -8,6 +8,7 @@ interface RemindersListProps {
   items: Reminder[];
   onDelete: (id: string) => void;
   onEdit: (item: Reminder) => void;
+  onView: (item: Reminder) => void;
   onCreate: () => void;
 }
 
@@ -20,6 +21,8 @@ const DAYS_MAP: Record<number, string> = {
   6: 'Сб',
   0: 'Вс',
 };
+
+const MAX_SHOWN_SUBSCRIBERS = 3;
 
 const formatFrequency = (item: Reminder): string => {
   switch (item.frequency) {
@@ -43,7 +46,32 @@ const formatFrequency = (item: Reminder): string => {
 const formatAuthor = (item: Reminder): string =>
   `${item.creatorFirstName} ${item.creatorUsername ? `(@${item.creatorUsername})` : ''}`;
 
-export const RemindersList: React.FC<RemindersListProps> = ({ items, onDelete, onEdit, onCreate }) => {
+const formatSubscribers = (item: Reminder): string => {
+  const subscribers = item.subscribers ?? [];
+  if (subscribers.length === 0) return 'Steam';
+  const shown = subscribers.slice(0, MAX_SHOWN_SUBSCRIBERS).map((s) => s.firstName).join(', ');
+  const rest = subscribers.length - MAX_SHOWN_SUBSCRIBERS;
+  return `Steam · Уведомим: ${shown}${rest > 0 ? ` и ещё ${rest}` : ''}`;
+};
+
+const typeAvatar = (item: Reminder): React.ReactNode =>
+  item.kind === 'steam_release' ? (
+    <Avatar size={40} style={{ background: 'var(--vkui--color_background_accent)' }}>
+      <Gamepad2 size={20} color="var(--vkui--color_background_contrast)" />
+    </Avatar>
+  ) : (
+    <Avatar size={40} style={{ background: 'var(--vkui--color_background_secondary_alpha)' }}>
+      <Bell size={18} color="var(--vkui--color_icon_secondary)" />
+    </Avatar>
+  );
+
+export const RemindersList: React.FC<RemindersListProps> = ({
+  items,
+  onDelete,
+  onEdit,
+  onView,
+  onCreate,
+}) => {
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
       const da = getNextFireDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
@@ -73,13 +101,15 @@ export const RemindersList: React.FC<RemindersListProps> = ({ items, onDelete, o
     <Group mode="card" header={<Header>Активные напоминания</Header>}>
       {sortedItems.map((item) => {
         const nextFire = getNextFireLabel(item);
+        const isSteam = item.kind === 'steam_release';
 
         return (
           <SimpleCell
             key={item._id}
             data-id={item._id}
+            before={typeAvatar(item)}
             subtitle={nextFire ? `Ближайшее: ${nextFire}` : formatFrequency(item)}
-            extraSubtitle={`${formatFrequency(item)} · ${formatAuthor(item)}`}
+            extraSubtitle={isSteam ? formatSubscribers(item) : `${formatFrequency(item)} · ${formatAuthor(item)}`}
             after={
               <IconButton
                 label="Удалить напоминание"
@@ -93,9 +123,9 @@ export const RemindersList: React.FC<RemindersListProps> = ({ items, onDelete, o
               </IconButton>
             }
             multiline
-            onClick={() => onEdit(item)}
+            onClick={() => (isSteam ? onView(item) : onEdit(item))}
           >
-            {item.message}
+            {isSteam ? (item.gameName || item.message) : item.message}
           </SimpleCell>
         );
       })}

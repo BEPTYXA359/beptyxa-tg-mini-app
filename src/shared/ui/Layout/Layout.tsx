@@ -24,7 +24,15 @@ export const Layout: React.FC = () => {
 
   return (
     <>
-      <main style={{ minHeight: '100dvh', paddingTop: 12, paddingBottom: TABBAR_OFFSET }}>
+      <main
+        style={{
+          minHeight: '100dvh',
+          paddingTop: 12,
+          paddingBottom: TABBAR_OFFSET,
+          paddingLeft: 'var(--vkui--size_base_padding_horizontal--regular)',
+          paddingRight: 'var(--vkui--size_base_padding_horizontal--regular)',
+        }}
+      >
         <Outlet />
       </main>
 

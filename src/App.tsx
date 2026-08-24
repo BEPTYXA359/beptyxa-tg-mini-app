@@ -3,6 +3,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { AppRoot, ConfigProvider } from '@vkontakte/vkui';
 
 import '@vkontakte/vkui/dist/vkui.css';
+import './styles/app.css';
 
 import { useTgAppearance } from '@/shared/hooks/useTgAppearance';
 import { FeedbackProvider } from '@/shared/ui/Feedback/FeedbackProvider';

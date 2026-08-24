@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert } from '@vkontakte/vkui';
 import { ReminderForm } from '@/features/reminders/ui/ReminderForm';
+import { ReminderSteamDetails } from '@/features/reminders/ui/ReminderSteamDetails';
 import { useUpdateReminders } from '@/features/reminders/hooks/useUpdateReminders.ts';
 import { useCreateReminders } from '@/features/reminders/hooks/useCreateReminders.ts';
 import {
@@ -55,6 +56,11 @@ export const ReminderFormPage: React.FC = () => {
       feedback.error('Не удалось сохранить напоминание');
     }
   };
+
+  // Напоминания о выходе игры нельзя редактировать — показываем только просмотр
+  if (reminderToEdit?.kind === 'steam_release') {
+    return <ReminderSteamDetails reminder={reminderToEdit} />;
+  }
 
   return (
     <>
