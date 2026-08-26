@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Button, Group, Header, IconButton, Placeholder, Search, SimpleCell } from '@vkontakte/vkui';
+import { Button, Group, Header, IconButton, Placeholder, Search } from '@vkontakte/vkui';
 import { Trash } from 'lucide-react';
 import type { Plate } from '../model/plates.types.ts';
 import { normalizePlate } from '../utils/plateFormat.ts';
-import { PlateNumber } from './PlateNumber.tsx';
+import { PlateCard } from './PlateCard.tsx';
 
 interface PlatesListProps {
   items: Plate[];
@@ -11,9 +11,6 @@ interface PlatesListProps {
   onEdit: (item: Plate) => void;
   onCreate: () => void;
 }
-
-const formatAuthor = (item: Plate): string =>
-  `Добавил: ${item.creatorFirstName}${item.creatorUsername ? ` (@${item.creatorUsername})` : ''}`;
 
 export const PlatesList: React.FC<PlatesListProps> = ({ items, onDelete, onEdit, onCreate }) => {
   const [query, setQuery] = useState('');
@@ -54,27 +51,19 @@ export const PlatesList: React.FC<PlatesListProps> = ({ items, onDelete, onEdit,
           <Placeholder title="Ничего не найдено">Попробуйте изменить запрос</Placeholder>
         ) : (
           filtered.map((item) => (
-            <SimpleCell
+            <div
               key={item._id}
-              before={<PlateNumber plate={item.plate} size="m" />}
-              subtitle={formatAuthor(item)}
-              after={
-                <IconButton
-                  label="Удалить номер"
-                  style={{ width: 36, height: 36, flex: 'none' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item._id);
-                  }}
-                >
-                  <Trash size={20} color="var(--vkui--color_icon_negative)" />
-                </IconButton>
-              }
-              multiline
-              onClick={() => onEdit(item)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px' }}
             >
-              {item.name}
-            </SimpleCell>
+              <PlateCard
+                plate={item.plate}
+                name={item.name}
+                onClick={() => onEdit(item)}
+              />
+              <IconButton label="Удалить номер" onClick={() => onDelete(item._id)}>
+                <Trash size={20} color="var(--vkui--color_icon_negative)" />
+              </IconButton>
+            </div>
           ))
         )}
       </Group>
