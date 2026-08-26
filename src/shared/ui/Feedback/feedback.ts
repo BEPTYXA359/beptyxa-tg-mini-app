@@ -6,7 +6,7 @@ export interface FeedbackApi {
   success: (message: string) => void;
   error: (message: string) => void;
   info: (message: string) => void;
-  undo: (message: string, onUndo: () => void) => void;
+  undo: (message: string, onUndo: () => void, duration?: number) => void;
 }
 
 export const FeedbackContext = createContext<FeedbackApi | null>(null);

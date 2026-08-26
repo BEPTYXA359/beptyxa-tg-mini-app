@@ -1,8 +1,13 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Group, Placeholder, PullToRefresh } from '@vkontakte/vkui';
 import { RemindersList } from '@/features/reminders/ui/RemindersList';
 import { useDeleteReminders } from '@/features/reminders/hooks/useDeleteReminders.ts';
+import {
+  markPendingDeletion,
+  unmarkPendingDeletion,
+  unmarkPendingDeletions,
+  usePendingDeletionIds,
+} from '@/features/reminders/model/pendingDeletions.ts';
 import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import type { Reminder } from '@/features/reminders/model/reminders.types.ts';
@@ -14,10 +19,11 @@ import { RemindersListSkeleton } from '@/shared/ui/Skeleton/RemindersListSkeleto
 import { BottomActionBar, BOTTOM_BAR_CLEARANCE } from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
 
 const UNDO_DELAY = 4000;
+// снекбар начинает отсчёт после анимации появления, поэтому гасим его до отправки DELETE
+const UNDO_SNACKBAR_DURATION = UNDO_DELAY - 600;
 
 export const RemindersPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const feedback = useFeedback();
 
   useTelegramBackButton(() => {
@@ -25,10 +31,25 @@ export const RemindersPage: React.FC = () => {
   });
 
   const chatId = getChatId();
-  const queryKey = useMemo(() => ['reminders', chatId] as const, [chatId]);
 
-  const { data: reminders = [], isLoading, isError, isFetching, refetch } = useGetReminders(chatId);
+  const { data, isLoading, isError, isFetching, refetch } = useGetReminders(chatId);
   const { mutate: deleteReminder } = useDeleteReminders(chatId);
+
+  const pendingIds = usePendingDeletionIds();
+  const reminders = useMemo(
+    () => (data ?? []).filter((reminder) => !pendingIds.has(reminder._id)),
+    [data, pendingIds],
+  );
+
+  // удаление подтверждено сервером, когда очередной ответ больше не содержит id
+  useEffect(() => {
+    if (data === undefined) return;
+    const serverIds = new Set(data.map((reminder) => reminder._id));
+    const confirmed = [...pendingIds].filter((id) => !serverIds.has(id));
+    if (confirmed.length > 0) {
+      unmarkPendingDeletions(confirmed);
+    }
+  }, [data, pendingIds]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -47,29 +68,33 @@ export const RemindersPage: React.FC = () => {
 
   const handleDelete = useCallback(
     (id: string) => {
-      const snapshot = reminders.find((r) => r._id === id);
-      if (!snapshot) return;
-
-      queryClient.setQueryData<Reminder[]>(queryKey, (list) =>
-        (list ?? []).filter((r) => r._id !== id),
-      );
+      markPendingDeletion(id);
 
       let undone = false;
+      let fired = false;
       const timer = setTimeout(() => {
-        if (!undone) {
-          deleteReminder(id, {
-            onError: () => feedback.error('Не удалось удалить напоминание'),
-          });
-        }
+        if (undone) return;
+        fired = true;
+        deleteReminder(id, {
+          onError: () => {
+            unmarkPendingDeletion(id);
+            feedback.error('Не удалось удалить напоминание');
+          },
+        });
       }, UNDO_DELAY);
 
-      feedback.undo('Напоминание удалено', () => {
-        undone = true;
-        clearTimeout(timer);
-        queryClient.setQueryData<Reminder[]>(queryKey, (list) => [...(list ?? []), snapshot]);
-      });
+      feedback.undo(
+        'Напоминание удалено',
+        () => {
+          if (fired) return;
+          undone = true;
+          clearTimeout(timer);
+          unmarkPendingDeletion(id);
+        },
+        UNDO_SNACKBAR_DURATION,
+      );
     },
-    [reminders, queryClient, queryKey, deleteReminder, feedback],
+    [deleteReminder, feedback],
   );
 
   if (isLoading) {

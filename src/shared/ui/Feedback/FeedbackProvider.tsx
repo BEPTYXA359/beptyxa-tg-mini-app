@@ -52,12 +52,12 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       info: (message) => {
         show({ variant: 'info', message, duration: DEFAULT_DURATION });
       },
-      undo: (message, onUndo) => {
+      undo: (message, onUndo, duration) => {
         haptic.impact('medium');
         show({
           variant: 'info',
           message,
-          duration: DEFAULT_DURATION,
+          duration: duration ?? DEFAULT_DURATION,
           action: (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               <Undo2 size={16} /> Отменить
