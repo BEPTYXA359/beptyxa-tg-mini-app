@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# Beptyxa TG Mini App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Мини-приложение для [@BeptyxaChatBot](https://t.me/BeptyxaChatBot)
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript)
+![VKUI](https://img.shields.io/badge/VKUI-8-0077FF?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat-square&logo=vitedotjs)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Возможности
 
-## React Compiler
+* **⏰ Напоминания** — разовые, ежедневные, через день и по дням недели с учётом часового пояса; steam-релизы в read-режиме со списком подписчиков; удаление с возможностью отмены
+* **🚗 Номера машин** — рамки-номера автомобилей, поиск по номеру и владельцу, живое превью при вводе, удаление с отменой
+* **⚙️ Настройки** — системные промпты для LLM и Балабола, стриминг ответов, ключ OpenAI и выбор модели, шанс случайных ответов в группах
+* **🏠 Главная** — виджеты с ближайшим напоминанием и последним добавленным номером
+* **📱 Telegram-интеграция** — авторизация по initData, BackButton, тема из цветовой схемы клиента, хаптика, pull-to-refresh и скелетоны загрузки
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Стек
 
-## Expanding the ESLint configuration
+* **UI:** React 18, VKUI 8, lucide-react
+* **Язык:** TypeScript (strict mode)
+* **Telegram:** @telegram-apps/sdk-react — initData, BackButton, themeParams, viewport
+* **Data:** TanStack Query 5, axios; формы на react-hook-form + zod
+* **Шрифты:** RoadNumbers + Roboto Mono
+* **Сборка:** Vite 8, ESLint, Prettier
+* **Infrastructure:** Docker (node:22-alpine → nginx:alpine), TLS от Let's Encrypt, nginx проксирует `/api` на бэкенд бота
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Быстрый запуск
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 1. Клонирование и установка зависимостей
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/BEPTYXA359/beptyxa-tg-mini-app.git
+cd beptyxa-tg-mini-app
+npm ci
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Настройка переменных окружения
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Приложение использует одну переменную — базовый URL API:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL = /api
 ```
+
+В режиме разработки `/api` проксируется на `http://127.0.0.1:3000`, поэтому рядом должен быть запущен [beptyxa-chat-bot-v2](https://github.com/BEPTYXA359/beptyxa-chat-bot-v2).
+
+### 3. Запуск в режиме разработки
+
+```bash
+npm run dev
+```
+
+---
+
+## Сборка и проверка типов
+
+```bash
+# Продакшен-сборка (tsc + vite build)
+npm run build
+
+# Локальный просмотр собранного бандла
+npm run preview
+
+# Линтинг
+npm run lint
+```
+
+## Docker
+
+```bash
+docker-compose up -d --build
+```
+
+Контейнер поднимает nginx на 443 порту (наружу — `8443`) с TLS-сертификатами Let's Encrypt и проксирует запросы к `/api` на бэкенд через общую сеть `beptyxa-network`. Параметры задаются переменными `SERVER_NAME`, `BACKEND_CONTAINER_NAME` и `BACKEND_PORT`.
