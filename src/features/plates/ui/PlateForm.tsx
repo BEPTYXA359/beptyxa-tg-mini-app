@@ -10,10 +10,6 @@ import {
 } from '../model/plates.types.ts';
 import { normalizePlate } from '../utils/plateFormat.ts';
 import { PlateCard } from './PlateCard.tsx';
-import {
-  BottomActionBar,
-  BOTTOM_BAR_CLEARANCE,
-} from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
 
 interface PlateFormProps {
   plateToEdit: Plate | null;
@@ -22,12 +18,7 @@ interface PlateFormProps {
   onDelete?: () => void;
 }
 
-export const PlateForm: React.FC<PlateFormProps> = ({
-  plateToEdit,
-  onFormSubmit,
-  onDirtyChange,
-  onDelete,
-}) => {
+export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit, onDirtyChange, onDelete }) => {
   const isEditMode = !!plateToEdit;
 
   const {
@@ -69,88 +60,82 @@ export const PlateForm: React.FC<PlateFormProps> = ({
         void handleSubmit(onSubmit)(e);
       }}
     >
-      <div style={{ paddingBottom: BOTTOM_BAR_CLEARANCE }}>
-        {(plateValue?.trim() || nameValue?.trim()) && (
-          <div style={{ paddingBottom: 12 }}>
-            <PlateCard plate={plateValue || ''} name={nameValue || ''} onClick={() => {}} />
-          </div>
-        )}
-        <Group mode="card" header={<Header>{isEditMode ? 'Редактирование' : 'Новый номер'}</Header>}>
-          <Controller
-            name="plate"
-            control={control}
-            render={({ field }) => (
-              <FormItem
-                top="Номер автомобиля"
-                status={errors.plate ? 'error' : 'default'}
-                bottom={errors.plate?.message ?? 'Российский формат, например А123ВС77'}
-              >
-                <Input
-                  {...field}
-                  placeholder="А123ВС77"
-                  value={field.value || ''}
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                />
-              </FormItem>
-            )}
-          />
-
-          <Controller
-            name="name"
-            control={control}
-            render={({ field }) => (
-              <FormItem
-                top="Имя владельца"
-                status={errors.name ? 'error' : 'default'}
-                bottom={errors.name?.message}
-              >
-                <Input {...field} placeholder="Например, Витя" value={field.value || ''} />
-              </FormItem>
-            )}
-          />
-          {isEditMode && plateToEdit && (
-            <div
-              style={{
-                padding: '0 16px 16px',
-                color: 'var(--vkui--color_text_secondary)',
-                fontSize: 13,
-                lineHeight: 1.35,
-              }}
-            >
-              Добавил: {plateToEdit.creatorFirstName}
-              {plateToEdit.creatorUsername ? ` (@${plateToEdit.creatorUsername})` : ''}
-            </div>
-          )}
-        </Group>
-
-        {isEditMode && onDelete && (
-          <div style={{ paddingTop: 12 }}>
-            <Button
-              size="l"
-              stretched
-              mode="secondary"
-              appearance="negative"
-              before={<Trash size={16} />}
-              onClick={onDelete}
-            >
-              Удалить номер
-            </Button>
-          </div>
-        )}
+      <div style={{ paddingBottom: 12 }}>
+        <PlateCard plate={plateValue || ''} name={nameValue || ''} />
       </div>
+      <Group mode="card" header={<Header>{isEditMode ? 'Редактирование' : 'Новый номер'}</Header>}>
+        <Controller
+          name="plate"
+          control={control}
+          render={({ field }) => (
+            <FormItem
+              top="Номер автомобиля"
+              status={errors.plate ? 'error' : 'default'}
+              bottom={errors.plate?.message ?? 'Российский формат, например А123ВС77'}
+            >
+              <Input
+                {...field}
+                placeholder="А123ВС77"
+                value={field.value || ''}
+                autoCapitalize="characters"
+                autoCorrect="off"
+              />
+            </FormItem>
+          )}
+        />
 
-      <BottomActionBar>
+        <Controller
+          name="name"
+          control={control}
+          render={({ field }) => (
+            <FormItem
+              top="Имя владельца"
+              status={errors.name ? 'error' : 'default'}
+              bottom={errors.name?.message}
+            >
+              <Input {...field} placeholder="Например, Витя" value={field.value || ''} />
+            </FormItem>
+          )}
+        />
+
+        {isEditMode && plateToEdit && (
+          <div
+            style={{
+              padding: '0 16px 16px',
+              color: 'var(--vkui--color_text_secondary)',
+              fontSize: 13,
+              lineHeight: 1.35,
+            }}
+          >
+            Добавил: {plateToEdit.creatorFirstName}
+            {plateToEdit.creatorUsername ? ` (@${plateToEdit.creatorUsername})` : ''}
+          </div>
+        )}
+      </Group>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
         <Button
           size="l"
           stretched
-          loading={isSubmitting}
           type="submit"
+          loading={isSubmitting}
           before={<Save size={16} />}
         >
           {isEditMode ? 'Сохранить изменения' : 'Добавить'}
         </Button>
-      </BottomActionBar>
+        {isEditMode && onDelete && (
+          <Button
+            size="l"
+            stretched
+            mode="secondary"
+            appearance="negative"
+            before={<Trash size={16} />}
+            onClick={onDelete}
+          >
+            Удалить номер
+          </Button>
+        )}
+      </div>
     </form>
   );
 };

@@ -41,3 +41,26 @@ export const parsePlateParts = (plate: string): PlateParts | null => {
   if (!match) return null;
   return { left: match[1], digits: match[2], right: match[3], region: match[4] };
 };
+
+const PARTIAL_SLOTS: Array<{ key: keyof PlateParts; max: number; letters: boolean }> = [
+  { key: 'left', max: 1, letters: true },
+  { key: 'digits', max: 3, letters: false },
+  { key: 'right', max: 2, letters: true },
+  { key: 'region', max: 3, letters: false },
+];
+
+export const parsePartialPlate = (plate: string): PlateParts => {
+  const parts: PlateParts = { left: '', digits: '', right: '', region: '' };
+  for (const char of normalizePlate(plate)) {
+    const isLetter = RU_PLATE_LETTERS.includes(char);
+    const isDigit = char >= '0' && char <= '9';
+    if (!isLetter && !isDigit) continue;
+    for (const slot of PARTIAL_SLOTS) {
+      if (slot.letters === isLetter && parts[slot.key].length < slot.max) {
+        parts[slot.key] += char;
+        break;
+      }
+    }
+  }
+  return parts;
+};

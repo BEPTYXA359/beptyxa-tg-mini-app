@@ -3,6 +3,7 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { AppRoot, ConfigProvider } from '@vkontakte/vkui';
 
 import '@vkontakte/vkui/dist/vkui.css';
+import '@fontsource/roboto-mono/400.css';
 import '@fontsource/roboto-mono/600.css';
 import './styles/fonts.css';
 import './styles/app.css';
