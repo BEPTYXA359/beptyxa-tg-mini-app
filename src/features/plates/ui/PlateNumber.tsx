@@ -19,7 +19,7 @@ interface PlateNumberSize {
   stripeHeight: number;
 }
 
-const SIZES: Record<'s' | 'm', PlateNumberSize> = {
+const SIZES: Record<'s' | 'm' | 'l', PlateNumberSize> = {
   s: {
     main: 13,
     region: 9,
@@ -43,6 +43,18 @@ const SIZES: Record<'s' | 'm', PlateNumberSize> = {
     gap: 4,
     stripeWidth: 11,
     stripeHeight: 3,
+  },
+  l: {
+    main: 26,
+    region: 17,
+    rus: 9,
+    border: 4,
+    radius: 10,
+    padX: 14,
+    padY: 8,
+    gap: 5,
+    stripeWidth: 15,
+    stripeHeight: 4,
   },
 };
 
