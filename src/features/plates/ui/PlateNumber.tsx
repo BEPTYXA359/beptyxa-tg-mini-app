@@ -54,7 +54,7 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
             >
               {parts.left}
             </span>
-            <span style={{ fontFamily: GOST_FONT_FAMILY, lineHeight: '25cqw' }}>
+            <span style={{ fontFamily: GOST_FONT_FAMILY, lineHeight: '18cqw' }}>
               {parts.digits}
             </span>
             <span
