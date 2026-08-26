@@ -6,7 +6,6 @@ import { haptic } from '@/shared/utils/haptic.util';
 
 interface PlatesWidgetProps {
   onClick: () => void;
-  // список приходит с бэкенда отсортированным по дате создания, поэтому первый элемент — последний добавленный
   plates: Plate[];
 }
 

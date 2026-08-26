@@ -5,6 +5,7 @@ import { isAxiosError } from 'axios';
 import { PlateForm } from '@/features/plates/ui/PlateForm.tsx';
 import { useUpdatePlate } from '@/features/plates/hooks/useUpdatePlate.ts';
 import { useCreatePlate } from '@/features/plates/hooks/useCreatePlate.ts';
+import { useUndoDeletePlate } from '@/features/plates/hooks/useUndoDeletePlate.ts';
 import {
   type Plate,
   type CreatePlateInput,
@@ -40,6 +41,7 @@ export const PlateFormPage: React.FC = () => {
 
   const { mutateAsync: createPlate } = useCreatePlate(chatId);
   const { mutateAsync: editPlate } = useUpdatePlate(chatId);
+  const deleteWithUndo = useUndoDeletePlate(chatId);
 
   const handleFormSubmit = async (data: CreatePlateInput, id?: string) => {
     try {
@@ -52,7 +54,6 @@ export const PlateFormPage: React.FC = () => {
       feedback.success(id ? 'Номер обновлён' : 'Номер добавлен');
       goBack();
     } catch (err) {
-      // бэкенд отвечает понятными текстами (например, про дубликат номера) — показываем их пользователю
       if (isAxiosError<{ error: string }>(err) && err.response?.data?.error) {
         feedback.error(err.response.data.error);
         return;
@@ -62,6 +63,13 @@ export const PlateFormPage: React.FC = () => {
     }
   };
 
+  const handleDelete = useCallback(() => {
+    if (!plateToEdit) return;
+    isDirtyRef.current = false;
+    deleteWithUndo(plateToEdit._id);
+    goBack();
+  }, [plateToEdit, deleteWithUndo, goBack]);
+
   return (
     <>
       <PlateForm
@@ -70,6 +78,7 @@ export const PlateFormPage: React.FC = () => {
         onDirtyChange={(dirty) => {
           isDirtyRef.current = dirty;
         }}
+        onDelete={plateToEdit ? handleDelete : undefined}
       />
 
       {showExitAlert && (

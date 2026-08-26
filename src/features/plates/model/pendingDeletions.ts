@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from 'react';
 
-// id номеров, ожидающих отправки отложенного DELETE; живут вне кэша react-query,
-// чтобы refetch до подтверждения удаления сервером не возвращал элементы в список
 let snapshot: ReadonlySet<string> = new Set();
 const listeners = new Set<() => void>();
 

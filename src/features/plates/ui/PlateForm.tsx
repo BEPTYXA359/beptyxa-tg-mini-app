@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, FormItem, Group, Header, Input } from '@vkontakte/vkui';
-import { Save } from 'lucide-react';
+import { Save, Trash } from 'lucide-react';
 import {
   type CreatePlateInput,
   createPlateSchema,
   type Plate,
 } from '../model/plates.types.ts';
-import { normalizePlate, parsePlateParts } from '../utils/plateFormat.ts';
-import { PlateNumber } from './PlateNumber.tsx';
+import { normalizePlate } from '../utils/plateFormat.ts';
+import { PlateCard } from './PlateCard.tsx';
 import {
   BottomActionBar,
   BOTTOM_BAR_CLEARANCE,
@@ -19,9 +19,15 @@ interface PlateFormProps {
   plateToEdit: Plate | null;
   onFormSubmit: (data: CreatePlateInput, id?: string) => Promise<void>;
   onDirtyChange?: (isDirty: boolean) => void;
+  onDelete?: () => void;
 }
 
-export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit, onDirtyChange }) => {
+export const PlateForm: React.FC<PlateFormProps> = ({
+  plateToEdit,
+  onFormSubmit,
+  onDirtyChange,
+  onDelete,
+}) => {
   const isEditMode = !!plateToEdit;
 
   const {
@@ -47,7 +53,7 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
   }, [plateToEdit, reset]);
 
   const plateValue = useWatch({ control, name: 'plate' });
-  const isPlateParsed = parsePlateParts(plateValue || '') !== null;
+  const nameValue = useWatch({ control, name: 'name' });
 
   const onSubmit = async (data: CreatePlateInput) => {
     try {
@@ -64,6 +70,11 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
       }}
     >
       <div style={{ paddingBottom: BOTTOM_BAR_CLEARANCE }}>
+        {(plateValue?.trim() || nameValue?.trim()) && (
+          <div style={{ paddingBottom: 12 }}>
+            <PlateCard plate={plateValue || ''} name={nameValue || ''} onClick={() => {}} />
+          </div>
+        )}
         <Group mode="card" header={<Header>{isEditMode ? 'Редактирование' : 'Новый номер'}</Header>}>
           <Controller
             name="plate"
@@ -98,13 +109,35 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
               </FormItem>
             )}
           />
-
-          {isPlateParsed && (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 20px' }}>
-              <PlateNumber plate={plateValue || ''} size="m" />
+          {isEditMode && plateToEdit && (
+            <div
+              style={{
+                padding: '0 16px 16px',
+                color: 'var(--vkui--color_text_secondary)',
+                fontSize: 13,
+                lineHeight: 1.35,
+              }}
+            >
+              Добавил: {plateToEdit.creatorFirstName}
+              {plateToEdit.creatorUsername ? ` (@${plateToEdit.creatorUsername})` : ''}
             </div>
           )}
         </Group>
+
+        {isEditMode && onDelete && (
+          <div style={{ paddingTop: 12 }}>
+            <Button
+              size="l"
+              stretched
+              mode="secondary"
+              appearance="negative"
+              before={<Trash size={16} />}
+              onClick={onDelete}
+            >
+              Удалить номер
+            </Button>
+          </div>
+        )}
       </div>
 
       <BottomActionBar>

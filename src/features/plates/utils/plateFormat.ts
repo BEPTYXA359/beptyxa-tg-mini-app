@@ -1,6 +1,5 @@
 export const RU_PLATE_LETTERS = 'АВЕКМНОРСТУХ';
 
-// На клавиатуре с латинской раскладкой буквы номера вводятся двойниками — приводим их к кириллице
 const LATIN_TO_CYRILLIC: Record<string, string> = {
   A: 'А',
   B: 'В',
