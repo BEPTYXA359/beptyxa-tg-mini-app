@@ -12,6 +12,8 @@ import { HomePage } from '@/pages/HomePage/HomePage';
 import { SettingsPage } from '@/pages/SettingsPage/SettingsPage';
 import { RemindersPage } from '@/pages/RemindersPage/RemindersPage';
 import { ReminderFormPage } from '@/pages/ReminderFormPage/ReminderFormPage';
+import { PlatesPage } from '@/pages/PlatesPage/PlatesPage';
+import { PlateFormPage } from '@/pages/PlateFormPage/PlateFormPage';
 
 export const App: React.FC = () => {
   const colorScheme = useTgAppearance();
@@ -27,6 +29,8 @@ export const App: React.FC = () => {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/reminders" element={<RemindersPage />} />
                 <Route path="/reminders/form" element={<ReminderFormPage />} />
+                <Route path="/plates" element={<PlatesPage />} />
+                <Route path="/plates/form" element={<PlateFormPage />} />
               </Route>
             </Routes>
           </BrowserRouter>
