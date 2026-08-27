@@ -1,13 +1,12 @@
 import React from 'react';
-import { parsePartialPlate, toDisplayLatin } from '../utils/plateFormat';
-
-const GOST_FONT_FAMILY =
-  "'RoadNumbers', ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace";
-
-const LETTERS_FONT_FAMILY = "'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
+import { normalizePlate, toDisplayLatin } from '../utils/plateFormat';
+import { MONO_FONT_FAMILY, PlateGlyphText } from './PlateGlyphText.tsx';
 
 export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
-  const parts = parsePartialPlate(plate);
+  const display = toDisplayLatin(normalizePlate(plate));
+  const match = /(.+?)(\d{2,3})$/.exec(display);
+  const main = match ? match[1] : display;
+  const region = match ? match[2] : '';
 
   return (
     <div
@@ -35,47 +34,11 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 2cqw',
-            fontSize: '25cqw',
-            fontWeight: 400,
-            lineHeight: 1.5,
             color: '#0a0a0a',
-            whiteSpace: 'nowrap',
             overflow: 'hidden',
-            fontFamily: GOST_FONT_FAMILY,
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'end',
-              letterSpacing: '1.5cqw',
-            }}
-          >
-            <span
-              style={{
-                textBoxTrim: 'trim-end',
-                textBoxEdge: 'text',
-              }}
-            >
-              {toDisplayLatin(parts.left)}
-            </span>
-            <span
-              style={{
-                textBoxTrim: 'trim-end',
-                textBoxEdge: 'text',
-              }}
-            >
-              {parts.digits}
-            </span>
-            <span
-              style={{
-                textBoxTrim: 'trim-end',
-                textBoxEdge: 'text',
-              }}
-            >
-              {toDisplayLatin(parts.right)}
-            </span>
-          </div>
+          <PlateGlyphText text={main} size="25cqw" spacingEm={0.06} />
         </div>
         <div
           style={{
@@ -83,25 +46,20 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-around',
             borderLeft: '1.2cqw solid #0a0a0a',
             padding: '1.8cqw 0.5cqw 1.4cqw',
           }}
         >
-          <span
+          <div
             style={{
-              fontFamily: GOST_FONT_FAMILY,
-              fontSize: '13cqw',
-              fontWeight: 400,
-              lineHeight: 1.4,
-              minHeight: '13cqw',
-              color: '#0a0a0a',
-              textBoxTrim: 'trim-end',
-              textBoxEdge: 'text',
+              minHeight: '8.5cqw',
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
-            {parts.region}
-          </span>
+            <PlateGlyphText text={region} size="13cqw" />
+          </div>
           <span
             style={{
               display: 'flex',
@@ -112,7 +70,7 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
           >
             <span
               style={{
-                fontFamily: LETTERS_FONT_FAMILY,
+                fontFamily: MONO_FONT_FAMILY,
                 fontSize: '3.8cqw',
                 fontWeight: 400,
                 letterSpacing: '0.2em',
