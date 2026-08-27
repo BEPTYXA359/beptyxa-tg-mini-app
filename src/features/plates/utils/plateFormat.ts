@@ -25,6 +25,13 @@ export const normalizePlate = (raw: string): string =>
     .replace(/[\s.-]/g, '')
     .replace(/[ABEKMHOPTCYX]/g, (char) => LATIN_TO_CYRILLIC[char] ?? char);
 
+const CYRILLIC_TO_LATIN: Record<string, string> = Object.fromEntries(
+  Object.entries(LATIN_TO_CYRILLIC).map(([latin, cyrillic]) => [cyrillic, latin]),
+);
+
+export const toDisplayLatin = (text: string): string =>
+  text.replace(new RegExp(`[${RU_PLATE_LETTERS}]`, 'g'), (char) => CYRILLIC_TO_LATIN[char] ?? char);
+
 export interface PlateParts {
   left: string;
   digits: string;

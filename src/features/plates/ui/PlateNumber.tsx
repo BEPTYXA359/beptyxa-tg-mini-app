@@ -1,5 +1,5 @@
 import React from 'react';
-import { parsePartialPlate } from '../utils/plateFormat';
+import { parsePartialPlate, toDisplayLatin } from '../utils/plateFormat';
 
 const GOST_FONT_FAMILY =
   "'RoadNumbers', ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace";
@@ -32,40 +32,48 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
           style={{
             flex: 1,
             display: 'flex',
-            alignItems: 'baseline',
+            alignItems: 'center',
             justifyContent: 'center',
             padding: '0 2cqw',
             fontSize: '25cqw',
             fontWeight: 400,
-            lineHeight: 1,
+            lineHeight: 1.5,
             color: '#0a0a0a',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
+            fontFamily: GOST_FONT_FAMILY,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'end', letterSpacing: '1.5cqw' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'end',
+              letterSpacing: '1.5cqw',
+            }}
+          >
             <span
               style={{
-                fontFamily: LETTERS_FONT_FAMILY,
-                fontWeight: 600,
-                fontSize: '16cqw',
-                lineHeight: '25cqw',
+                textBoxTrim: 'trim-end',
+                textBoxEdge: 'text',
               }}
             >
-              {parts.left}
+              {toDisplayLatin(parts.left)}
             </span>
-            <span style={{ fontFamily: GOST_FONT_FAMILY, lineHeight: '18cqw' }}>
+            <span
+              style={{
+                textBoxTrim: 'trim-end',
+                textBoxEdge: 'text',
+              }}
+            >
               {parts.digits}
             </span>
             <span
               style={{
-                fontFamily: LETTERS_FONT_FAMILY,
-                fontWeight: 600,
-                fontSize: '16cqw',
-                lineHeight: '25cqw',
+                textBoxTrim: 'trim-end',
+                textBoxEdge: 'text',
               }}
             >
-              {parts.right}
+              {toDisplayLatin(parts.right)}
             </span>
           </div>
         </div>
@@ -85,9 +93,11 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
               fontFamily: GOST_FONT_FAMILY,
               fontSize: '13cqw',
               fontWeight: 400,
-              lineHeight: 1,
+              lineHeight: 1.4,
               minHeight: '13cqw',
               color: '#0a0a0a',
+              textBoxTrim: 'trim-end',
+              textBoxEdge: 'text',
             }}
           >
             {parts.region}
