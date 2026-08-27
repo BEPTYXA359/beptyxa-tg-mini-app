@@ -16,6 +16,7 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
         containerType: 'inline-size',
         background: '#fff',
         borderRadius: '1.6cqw',
+        color: '#0a0a0a',
       }}
     >
       <div
@@ -34,7 +35,6 @@ export const PlateNumber: React.FC<{ plate: string }> = ({ plate }) => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 2cqw',
-            color: '#0a0a0a',
             overflow: 'hidden',
           }}
         >
