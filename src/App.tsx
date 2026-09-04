@@ -18,6 +18,7 @@ import { PlatesPage } from '@/pages/PlatesPage/PlatesPage';
 import { PlateFormPage } from '@/pages/PlateFormPage/PlateFormPage';
 import { SubscriptionsPage } from '@/pages/SubscriptionsPage/SubscriptionsPage';
 import { SubscriptionFormPage } from '@/pages/SubscriptionFormPage/SubscriptionFormPage';
+import { ConverterPage } from '@/pages/ConverterPage/ConverterPage';
 
 export const App: React.FC = () => {
   const colorScheme = useTgAppearance();
@@ -37,6 +38,7 @@ export const App: React.FC = () => {
                 <Route path="/plates/form" element={<PlateFormPage />} />
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />
                 <Route path="/subscriptions/form" element={<SubscriptionFormPage />} />
+                <Route path="/converter" element={<ConverterPage />} />
               </Route>
             </Routes>
           </BrowserRouter>

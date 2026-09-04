@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { RemindersWidget } from '@/features/reminders/ui/RemindersWidget.tsx';
 import { PlatesWidget } from '@/features/plates/ui/PlatesWidget.tsx';
 import { SubscriptionsWidget } from '@/features/subscriptions/ui/SubscriptionsWidget.tsx';
+import { ConverterWidget } from '@/features/converter/ui/ConverterWidget.tsx';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
 import { usePendingDeletionIds } from '@/features/reminders/model/pendingDeletions.ts';
@@ -48,6 +49,7 @@ export const HomePage: React.FC = () => {
         subscriptions={subscriptions}
         onClick={() => void navigate(`/subscriptions`)}
       />
+      <ConverterWidget onClick={() => void navigate(`/converter`)} />
     </div>
   );
 };
