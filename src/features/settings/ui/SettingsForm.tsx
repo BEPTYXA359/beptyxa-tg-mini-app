@@ -16,7 +16,11 @@ import {
 import { useForm, Controller, type Resolver, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateSettings } from '../hooks/useUpdateSettings';
-import { type ChatSettings, ChatSettingsSchema } from '../model/settings.schema';
+import {
+  type ChatSettings,
+  ChatSettingsSchema,
+  MAX_SYSTEM_PROMPT_LENGTH,
+} from '../model/settings.schema';
 import { Save } from 'lucide-react';
 import { getIsGroupChat } from '@/shared/utils/telegram.util.ts';
 import { haptic } from '@/shared/utils/haptic.util';
@@ -130,7 +134,12 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
             control={control}
             render={({ field }) => (
               <FormItem top="Системный промпт (LLM)">
-                <Textarea {...field} placeholder="Ты полезный ассистент." value={field.value || ''} />
+                <Textarea
+                  {...field}
+                  maxLength={MAX_SYSTEM_PROMPT_LENGTH}
+                  placeholder="Ты полезный ассистент."
+                  value={field.value || ''}
+                />
               </FormItem>
             )}
           />
@@ -197,7 +206,12 @@ export const SettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: nu
             control={control}
             render={({ field }) => (
               <FormItem top="Характер (Системный промпт)">
-                <Textarea {...field} placeholder="Ты саркастичный участник чата." value={field.value || ''} />
+                <Textarea
+                  {...field}
+                  maxLength={MAX_SYSTEM_PROMPT_LENGTH}
+                  placeholder="Ты саркастичный участник чата."
+                  value={field.value || ''}
+                />
               </FormItem>
             )}
           />
