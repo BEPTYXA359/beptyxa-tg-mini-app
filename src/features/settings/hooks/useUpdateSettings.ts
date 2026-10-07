@@ -1,12 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/api.client';
-import type { ChatSettings, UpdateSettingsResponse } from '../model/settings.schema';
+import type {
+  ChatSettings,
+  LlmProviderPatch,
+  UpdateSettingsResponse,
+} from '../model/settings.schema';
+
+export interface UpdateSettingsPayload extends Partial<Omit<ChatSettings, 'providers'>> {
+  llmProviders?: Record<string, LlmProviderPatch>;
+}
 
 export const useUpdateSettings = (chatId?: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newSettings: Partial<ChatSettings>) => {
+    mutationFn: async (newSettings: UpdateSettingsPayload) => {
       const { data } = await apiClient.post<UpdateSettingsResponse>('/settings', newSettings, {
         params: chatId ? { chatId } : {},
       });

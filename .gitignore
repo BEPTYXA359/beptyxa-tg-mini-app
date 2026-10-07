@@ -17,10 +17,10 @@ dist-ssr
 !.env.example
 
 # Editor directories and files
-.vscode/*
+.*
+!.github
+!.env.example
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj

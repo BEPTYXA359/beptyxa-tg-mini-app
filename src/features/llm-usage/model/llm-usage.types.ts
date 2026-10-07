@@ -5,7 +5,15 @@ export type LlmUsageSource =
   | 'inline_router'
   | 'currency_parse';
 
-export type LlmUsageProvider = 'OpenAi' | 'Groq';
+export type LlmUsageProvider =
+  | 'OpenAi'
+  | 'Groq'
+  | 'Glm'
+  | 'DeepSeek'
+  | 'Gemini'
+  | 'Anthropic'
+  | 'Xai'
+  | 'OpenRouter';
 
 export interface LlmUsageTotals {
   requests: number;
@@ -38,6 +46,12 @@ export interface LlmUsageSummary {
 export const PROVIDER_LABELS: Record<LlmUsageProvider, string> = {
   OpenAi: 'ChatGPT',
   Groq: 'Groq',
+  Glm: 'GLM',
+  DeepSeek: 'DeepSeek',
+  Gemini: 'Gemini',
+  Anthropic: 'Claude',
+  Xai: 'Grok',
+  OpenRouter: 'OpenRouter',
 };
 
 export const SOURCE_LABELS: Record<LlmUsageSource, string> = {
