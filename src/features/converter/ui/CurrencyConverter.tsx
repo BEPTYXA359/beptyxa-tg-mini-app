@@ -1,14 +1,34 @@
 import React, { useMemo, useState } from 'react';
-import { Button, CustomSelect, Div, FormItem, IconButton, Input, Spinner } from '@vkontakte/vkui';
+import {
+  Button,
+  CustomSelect,
+  FormItem,
+  IconButton,
+  Input,
+  SegmentedControl,
+  Spinner,
+} from '@vkontakte/vkui';
 import { Plus, X } from 'lucide-react';
 import { useGetCurrencyRates } from '@/features/subscriptions/hooks/useGetCurrencyRates.ts';
-import { convertAmount, hasRates } from '@/features/subscriptions/utils/money.ts';
+import {
+  convertAmount,
+  getRateCurrencies,
+  hasRates,
+} from '@/features/subscriptions/utils/money.ts';
+import type { ConversionMode } from '@/features/subscriptions/utils/money.ts';
 import { haptic } from '@/shared/utils/haptic.util.ts';
 import { currencyFlag } from '../model/currency-flag.ts';
-import { loadCurrencyState, saveCurrencyState } from '../model/currency-storage.ts';
+import {
+  loadCurrencyState,
+  saveCurrencyState,
+  type ConversionDirection,
+} from '../model/currency-storage.ts';
 
 function parseAmount(raw: string): number | null {
-  const normalized = raw.replace(/[\s\u00A0\u202F]/g, '').replace(',', '.').trim();
+  const normalized = raw
+    .replace(/[\s\u00A0\u202F]/g, '')
+    .replace(',', '.')
+    .trim();
   if (!normalized) return null;
   const value = Number(normalized);
   return Number.isFinite(value) ? value : null;
@@ -27,7 +47,10 @@ function formatAmount(value: number): string {
  */
 function makeRowFilter(currentCode: string) {
   return (query: string, option: { label: string }): boolean => {
-    const normalized = query.replace(/^[^\p{L}\p{N}]+/u, '').trim().toLowerCase();
+    const normalized = query
+      .replace(/^[^\p{L}\p{N}]+/u, '')
+      .trim()
+      .toLowerCase();
     if (!normalized) return true;
 
     const current = currentCode.toLowerCase();
@@ -44,9 +67,13 @@ export const CurrencyConverter: React.FC = () => {
   const initial = useMemo(() => loadCurrencyState(), []);
   const [rows, setRows] = useState<string[]>(initial.rows);
   const [last, setLast] = useState(initial.last);
+  const [direction, setDirection] = useState<ConversionDirection>(initial.direction);
+
+  const isDirected = hasRates(ratesData) && 'pairs' in ratesData;
+  const conversionMode: ConversionMode = direction === 'buy' ? 'price' : 'exchange';
 
   const codes = useMemo(
-    () => (hasRates(ratesData) ? Object.keys(ratesData.rates).sort() : []),
+    () => (hasRates(ratesData) ? getRateCurrencies(ratesData) : []),
     [ratesData],
   );
   const currencyOptions = useMemo(
@@ -54,8 +81,12 @@ export const CurrencyConverter: React.FC = () => {
     [codes],
   );
 
-  const persist = (nextRows: string[], nextLast: typeof last) => {
-    saveCurrencyState({ rows: nextRows, last: nextLast });
+  const persist = (
+    nextRows: string[],
+    nextLast: typeof last,
+    nextDirection: ConversionDirection = direction,
+  ) => {
+    saveCurrencyState({ rows: nextRows, last: nextLast, direction: nextDirection });
   };
 
   const displayFor = (code: string): string => {
@@ -64,8 +95,14 @@ export const CurrencyConverter: React.FC = () => {
 
     const amount = parseAmount(last.raw);
     if (amount === null || !hasRates(ratesData)) return '';
-    const value = convertAmount(amount, last.code, code, ratesData.rates);
+    const value = convertAmount(amount, last.code, code, ratesData, conversionMode);
     return value === null ? '' : formatAmount(value);
+  };
+
+  const changeDirection = (next: ConversionDirection) => {
+    haptic.impact('light');
+    setDirection(next);
+    persist(rows, last, next);
   };
 
   const editRow = (code: string, raw: string) => {
@@ -116,7 +153,7 @@ export const CurrencyConverter: React.FC = () => {
         const amount = parseAmount(last.raw);
         const converted =
           amount !== null
-            ? convertAmount(amount, last.code, nextRows[0], ratesData.rates)
+            ? convertAmount(amount, last.code, nextRows[0], ratesData, conversionMode)
             : null;
         nextLast = {
           code: nextRows[0],
@@ -134,24 +171,36 @@ export const CurrencyConverter: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
         <Spinner size="l" />
-      </Div>
+      </div>
     );
   }
 
   if (isError || !hasRates(ratesData)) {
     return (
-      <Div>
+      <div>
         <Button size="l" stretched mode="secondary" disabled>
           Курсы валют недоступны
         </Button>
-      </Div>
+      </div>
     );
   }
 
   return (
     <div>
+      {isDirected && (
+        <FormItem top="Направление">
+          <SegmentedControl
+            value={direction}
+            options={[
+              { label: 'Продаю', value: 'sell' },
+              { label: 'Покупаю', value: 'buy' },
+            ]}
+            onChange={(value) => changeDirection(value as ConversionDirection)}
+          />
+        </FormItem>
+      )}
       <FormItem top="Валюты">
         <div>
           {rows.map((code, index) => (
@@ -191,11 +240,11 @@ export const CurrencyConverter: React.FC = () => {
       </FormItem>
 
       {rows.length < codes.length && (
-        <Div style={{ paddingTop: 0 }}>
+        <div style={{ paddingTop: 0 }}>
           <Button size="l" stretched mode="secondary" before={<Plus size={20} />} onClick={addRow}>
             Добавить валюту
           </Button>
-        </Div>
+        </div>
       )}
     </div>
   );

@@ -128,7 +128,7 @@ export const SubscriptionsPage: React.FC = () => {
             variant="active"
             items={active}
             baseCurrency={baseCurrency}
-            rates={rates?.rates}
+            rates={rates}
             onDelete={handleDelete}
             onEdit={handleEdit}
             onCreate={() => void navigate('/subscriptions/form')}
@@ -138,7 +138,7 @@ export const SubscriptionsPage: React.FC = () => {
             variant="paused"
             items={paused}
             baseCurrency={baseCurrency}
-            rates={rates?.rates}
+            rates={rates}
             onDelete={handleDelete}
             onEdit={handleEdit}
             onCreate={() => void navigate('/subscriptions/form')}

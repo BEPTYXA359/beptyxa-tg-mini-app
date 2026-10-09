@@ -37,7 +37,7 @@ export const SubscriptionsWidget: React.FC<SubscriptionsWidgetProps> = ({
     if (active.length === 0) return { count: 0, subtitle: 'Подписок пока нет' };
 
     const baseCurrency = settings?.baseCurrency ?? DEFAULT_BASE_CURRENCY;
-    const totals = hasRates(rates) ? totalCosts(active, baseCurrency, rates.rates) : null;
+    const totals = hasRates(rates) ? totalCosts(active, baseCurrency, rates) : null;
 
     return {
       count: active.length,

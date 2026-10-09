@@ -31,10 +31,21 @@ export interface SubscriptionSettings {
   baseCurrency: string;
 }
 
-export interface CurrencyRates {
+export type RatesSource = 'openexchangerates' | 'cbrf' | 'tbank' | 'steam';
+
+export interface TableRates {
+  source: RatesSource;
   base: string;
   rates: Record<string, number>;
 }
+
+export interface TbankRates {
+  source: 'tbank';
+  base: 'RUB';
+  pairs: Record<string, { buy: number; sell: number }>;
+}
+
+export type CurrencyRates = TableRates | TbankRates;
 
 /** Тело POST/PUT — optionals поднимаются из пустых строк формы */
 export interface SubscriptionPayload {

@@ -1,7 +1,9 @@
+export type ConversionDirection = 'sell' | 'buy';
+
 export interface CurrencyConverterState {
   rows: string[];
-  /** Строка последнего ввода: её значение считается исходным */
   last: { code: string; raw: string } | null;
+  direction: ConversionDirection;
 }
 
 const STORAGE_KEY = 'converter:currency';
@@ -24,14 +26,16 @@ export function loadCurrencyState(): CurrencyConverterState {
           typeof last.raw === 'string' &&
           rows.includes(last.code);
 
-        return { rows, last: lastIsValid ? last : null };
+        const direction: ConversionDirection = parsed.direction === 'buy' ? 'buy' : 'sell';
+
+        return { rows, last: lastIsValid ? last : null, direction };
       }
     }
   } catch {
     // Битые данные в localStorage — используем значения по умолчанию
   }
 
-  return { rows: DEFAULT_ROWS, last: { code: DEFAULT_ROWS[0], raw: '100' } };
+  return { rows: DEFAULT_ROWS, last: { code: DEFAULT_ROWS[0], raw: '100' }, direction: 'sell' };
 }
 
 export function saveCurrencyState(state: CurrencyConverterState): void {

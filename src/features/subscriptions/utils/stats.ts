@@ -1,4 +1,4 @@
-import type { Subscription, SubscriptionPeriod } from '../model/subscriptions.types';
+import type { CurrencyRates, Subscription, SubscriptionPeriod } from '../model/subscriptions.types';
 import { convertAmount } from './money';
 
 /** Сколько стоит период подписки в пересчёте на месяц */
@@ -21,11 +21,12 @@ export function yearlyCost(subscription: Subscription): number {
 /**
  * Суммарный расход в месяц/год в валюте baseCurrency.
  * Возвращает null, если хотя бы одну цену не удалось конвертировать (нет курсов).
+ * Подписки — «стоимость товара»: для Т-Банка считаем по sell (списание по карте).
  */
 export function totalCosts(
   subscriptions: Subscription[],
   baseCurrency: string,
-  rates: Record<string, number>,
+  rates: CurrencyRates,
 ): { monthly: number; yearly: number } | null {
   let monthly = 0;
   for (const subscription of subscriptions) {
@@ -34,6 +35,7 @@ export function totalCosts(
       subscription.currency,
       baseCurrency,
       rates,
+      'price',
     );
     if (converted === null) return null;
     monthly += converted;

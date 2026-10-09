@@ -13,7 +13,7 @@ interface StatsBlockProps {
 export const StatsBlock: React.FC<StatsBlockProps> = ({ subscriptions, baseCurrency, rates }) => {
   if (subscriptions.length === 0) return null;
 
-  const totals = hasRates(rates) ? totalCosts(subscriptions, baseCurrency, rates.rates) : null;
+  const totals = hasRates(rates) ? totalCosts(subscriptions, baseCurrency, rates) : null;
 
   return (
     <Group mode="card" header={<Header>Статистика</Header>}>

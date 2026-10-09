@@ -1,13 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/api.client.ts';
-import type { CurrencyRates } from '../model/subscriptions.types';
+import { getChatId } from '@/shared/utils/telegram.util.ts';
+import type { CurrencyRates, RatesSource } from '../model/subscriptions.types';
 
-/** Курсы обновляются на бэке раз в сутки, поэтому кэшируем на час */
-export function useGetCurrencyRates(options: { enabled?: boolean } = {}) {
+export function useGetCurrencyRates(options: { enabled?: boolean; source?: RatesSource } = {}) {
+  const chatId = getChatId();
+
   return useQuery<CurrencyRates, Error>({
-    queryKey: ['currency-rates'],
+    queryKey: ['currency-rates', chatId, options.source ?? null],
     queryFn: async () => {
-      const response = await apiClient.get<CurrencyRates>(`/currency`);
+      const response = await apiClient.get<CurrencyRates>(`/currency`, {
+        params: {
+          ...(chatId ? { chatId } : {}),
+          ...(options.source ? { source: options.source } : {}),
+        },
+      });
       return response.data;
     },
     staleTime: 60 * 60 * 1000,

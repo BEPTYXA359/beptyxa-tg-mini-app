@@ -19,6 +19,7 @@ import { PlateFormPage } from '@/pages/PlateFormPage/PlateFormPage';
 import { SubscriptionsPage } from '@/pages/SubscriptionsPage/SubscriptionsPage';
 import { SubscriptionFormPage } from '@/pages/SubscriptionFormPage/SubscriptionFormPage';
 import { ConverterPage } from '@/pages/ConverterPage/ConverterPage';
+import { ConversionSettingsPage } from '@/pages/ConversionSettingsPage/ConversionSettingsPage';
 import { LlmUsagePage } from '@/pages/LlmUsagePage/LlmUsagePage';
 
 export const App: React.FC = () => {
@@ -40,6 +41,7 @@ export const App: React.FC = () => {
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />
                 <Route path="/subscriptions/form" element={<SubscriptionFormPage />} />
                 <Route path="/converter" element={<ConverterPage />} />
+                <Route path="/conversion-settings" element={<ConversionSettingsPage />} />
                 <Route path="/llm-usage" element={<LlmUsagePage />} />
               </Route>
             </Routes>

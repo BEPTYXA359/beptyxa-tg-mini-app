@@ -9,7 +9,7 @@ import {
   SimpleCell,
 } from '@vkontakte/vkui';
 import { BellOff, CreditCard, Trash } from 'lucide-react';
-import type { Subscription } from '../model/subscriptions.types';
+import type { CurrencyRates, Subscription } from '../model/subscriptions.types';
 import { PERIOD_LABELS } from '../model/subscriptions.types.ts';
 import { contrastTextColor } from '../utils/color.ts';
 import { convertAmount, formatMoney, formatMoneyShort } from '../utils/money.ts';
@@ -20,7 +20,7 @@ interface SubscriptionsListProps {
   variant: 'active' | 'paused';
   items: Subscription[];
   baseCurrency: string;
-  rates: Record<string, number> | undefined;
+  rates: CurrencyRates | undefined;
   onDelete: (id: string) => void;
   onEdit: (item: Subscription) => void;
   onCreate: () => void;
@@ -76,7 +76,7 @@ export const SubscriptionsList: React.FC<SubscriptionsListProps> = ({
       {sortedItems.map((item) => {
         const approxBase =
           item.currency !== baseCurrency && rates
-            ? convertAmount(item.cost, item.currency, baseCurrency, rates)
+            ? convertAmount(item.cost, item.currency, baseCurrency, rates, 'price')
             : null;
 
         const priceLine = [
