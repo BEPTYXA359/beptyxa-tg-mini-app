@@ -1,12 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Group, Placeholder, SimpleCell } from '@vkontakte/vkui';
-import { ArrowLeftRight, BarChart3, ChevronRight } from 'lucide-react';
-import { useGetSettings, SettingsForm } from '@/features/settings';
-import { getChatId } from '@/shared/utils/telegram.util.ts';
-import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
-import { SettingsSkeleton } from '@/shared/ui/Skeleton/SettingsSkeleton.tsx';
-import { haptic } from '@/shared/utils/haptic.util.ts';
+import { Group, Header, SimpleCell } from '@vkontakte/vkui';
+import { ArrowLeftRight, BarChart3, Bot, ChevronRight, Drama, Gamepad2 } from 'lucide-react';
+import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton';
+import { haptic } from '@/shared/utils/haptic.util';
+
+interface MenuItemProps {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ icon, label, path }) => {
+  const navigate = useNavigate();
+
+  return (
+    <SimpleCell
+      before={icon}
+      after={<ChevronRight size={20} style={{ color: 'var(--vkui--color_icon_secondary)' }} />}
+      onClick={() => {
+        haptic.impact('light');
+        void navigate(path);
+      }}
+    >
+      {label}
+    </SimpleCell>
+  );
+};
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,51 +35,21 @@ export const SettingsPage: React.FC = () => {
     void navigate('/');
   });
 
-  const chatId = getChatId();
-
-  const { data: settings, isLoading, isError } = useGetSettings(chatId);
-
-  if (isLoading) {
-    return <SettingsSkeleton />;
-  }
-
-  if (isError) {
-    return (
-      <Group>
-        <Placeholder title="Ошибка">Не удалось загрузить настройки сервера.</Placeholder>
-      </Group>
-    );
-  }
-
-  if (!settings) return null;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <Group mode="card">
-        <SimpleCell
-          before={<ArrowLeftRight size={24} />}
-          after={<ChevronRight size={20} style={{ color: 'var(--vkui--color_icon_secondary)' }} />}
-          onClick={() => {
-            haptic.impact('light');
-            void navigate('/conversion-settings');
-          }}
-        >
-          Конвертация
-        </SimpleCell>
+      <Group mode="card" header={<Header>AI-чат</Header>}>
+        <MenuItem icon={<Bot size={24} />} label="Настройки LLM" path="/llm-settings" />
+        <MenuItem icon={<Drama size={24} />} label="Настройки Балабола" path="/chatterbox-settings" />
+        <MenuItem icon={<BarChart3 size={24} />} label="Статистика LLM" path="/llm-usage" />
       </Group>
-      <Group mode="card">
-        <SimpleCell
-          before={<BarChart3 size={24} />}
-          after={<ChevronRight size={20} style={{ color: 'var(--vkui--color_icon_secondary)' }} />}
-          onClick={() => {
-            haptic.impact('light');
-            void navigate('/llm-usage');
-          }}
-        >
-          Статистика LLM
-        </SimpleCell>
+      <Group mode="card" header={<Header>Конвертер и Steam</Header>}>
+        <MenuItem
+          icon={<ArrowLeftRight size={24} />}
+          label="Настройки конвертера"
+          path="/conversion-settings"
+        />
+        <MenuItem icon={<Gamepad2 size={24} />} label="Настройки Steam" path="/steam-settings" />
       </Group>
-      <SettingsForm initialSettings={settings} chatId={chatId} />
     </div>
   );
 };

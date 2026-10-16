@@ -9,6 +9,14 @@ export interface LlmProviderMeta {
 
 export const LLM_PROVIDERS_META: LlmProviderMeta[] = [
   {
+    id: 'OpenAi',
+    label: 'OpenAI (ChatGPT)',
+    defaultTrigger: 'чатгпт',
+    hasApiKeyField: true,
+    keyPlaceholder: 'sk-...',
+    defaultModel: 'gpt-4o-mini',
+  },
+  {
     id: 'Groq',
     label: 'Groq',
     defaultTrigger: 'грок',

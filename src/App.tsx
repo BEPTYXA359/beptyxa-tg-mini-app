@@ -21,6 +21,9 @@ import { SubscriptionFormPage } from '@/pages/SubscriptionFormPage/SubscriptionF
 import { ConverterPage } from '@/pages/ConverterPage/ConverterPage';
 import { ConversionSettingsPage } from '@/pages/ConversionSettingsPage/ConversionSettingsPage';
 import { LlmUsagePage } from '@/pages/LlmUsagePage/LlmUsagePage';
+import { LlmSettingsPage } from '@/pages/LlmSettingsPage/LlmSettingsPage';
+import { ChatterboxSettingsPage } from '@/pages/ChatterboxSettingsPage/ChatterboxSettingsPage';
+import { SteamSettingsPage } from '@/pages/SteamSettingsPage/SteamSettingsPage';
 
 export const App: React.FC = () => {
   const colorScheme = useTgAppearance();
@@ -42,6 +45,9 @@ export const App: React.FC = () => {
                 <Route path="/subscriptions/form" element={<SubscriptionFormPage />} />
                 <Route path="/converter" element={<ConverterPage />} />
                 <Route path="/conversion-settings" element={<ConversionSettingsPage />} />
+                <Route path="/llm-settings" element={<LlmSettingsPage />} />
+                <Route path="/chatterbox-settings" element={<ChatterboxSettingsPage />} />
+                <Route path="/steam-settings" element={<SteamSettingsPage />} />
                 <Route path="/llm-usage" element={<LlmUsagePage />} />
               </Route>
             </Routes>
