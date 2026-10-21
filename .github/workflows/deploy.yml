@@ -16,27 +16,39 @@ jobs:
           REPO_URL: "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
 
           SERVER_NAME: ${{ secrets.SERVER_NAME }}
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+          FRONTEND_BIND: ${{ secrets.FRONTEND_BIND }}
           BACKEND_CONTAINER_NAME: ${{ secrets.BACKEND_CONTAINER_NAME }}
           BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          envs: PROJECT_DIR,REPO_URL,SERVER_NAME,BACKEND_CONTAINER_NAME,BACKEND_PORT
+          envs: PROJECT_DIR,REPO_URL,SERVER_NAME,SITE_DOMAIN,FRONTEND_BIND,BACKEND_CONTAINER_NAME,BACKEND_PORT
           script: |
+            if [ -z "$SITE_DOMAIN" ]; then
+              echo "SITE_DOMAIN secret is not set"
+              exit 1
+            fi
+
             if [ ! -d "$PROJECT_DIR" ]; then
               mkdir -p /projects
               cd /projects
               git clone $REPO_URL $(basename $PROJECT_DIR)
             fi
-            
+
             cd $PROJECT_DIR
-            git pull origin main
-            
-            echo "SERVER_NAME=$SERVER_NAME" > .env
-            echo "BACKEND_CONTAINER_NAME=$BACKEND_CONTAINER_NAME" >> .env
-            echo "BACKEND_PORT=$BACKEND_PORT" >> .env
-            
+            git fetch origin
+            git reset --hard origin/main
+
+            cat > .env <<ENVFILE
+            SERVER_NAME=$SERVER_NAME
+            SITE_DOMAIN=$SITE_DOMAIN
+            FRONTEND_BIND=$FRONTEND_BIND
+            BACKEND_CONTAINER_NAME=$BACKEND_CONTAINER_NAME
+            BACKEND_PORT=$BACKEND_PORT
+            ENVFILE
+
             docker-compose up -d --build
-            
+
             docker image prune -f
