@@ -30,3 +30,68 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
+
+server {
+    listen 443 ssl;
+    server_name ${SITE_DOMAIN} www.${SITE_DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${SITE_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SITE_DOMAIN}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    return 302 https://${SERVER_NAME}$request_uri;
+}
+
+server {
+    listen 444 ssl proxy_protocol;
+    server_name ${SERVER_NAME};
+
+    set_real_ip_from 127.0.0.1;
+    set_real_ip_from 172.16.0.0/12;
+    real_ip_header proxy_protocol;
+
+    ssl_certificate /etc/letsencrypt/live/${SERVER_NAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SERVER_NAME}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers  on;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    root /usr/share/nginx/html;
+    index index.html;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://${BACKEND_CONTAINER_NAME}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+server {
+    listen 444 ssl proxy_protocol;
+    server_name ${SITE_DOMAIN} www.${SITE_DOMAIN};
+
+    set_real_ip_from 127.0.0.1;
+    set_real_ip_from 172.16.0.0/12;
+    real_ip_header proxy_protocol;
+
+    ssl_certificate /etc/letsencrypt/live/${SITE_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SITE_DOMAIN}/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    return 302 https://${SERVER_NAME}$request_uri;
+}
