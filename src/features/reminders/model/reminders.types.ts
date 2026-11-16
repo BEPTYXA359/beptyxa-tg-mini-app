@@ -39,13 +39,56 @@ export interface Reminder {
   createdAt: string;
 }
 
-export const createReminderSchema = z.object({
-  message: z.string().min(1, 'Введите текст напоминания').max(1000),
-  frequency: z.enum(['once', 'daily', 'every_other_day', 'specific_days'] as const),
-  time: z.string().min(1, 'Выберите время'),
-  specificDays: z.array(z.number().min(0).max(6)).optional(),
-  timezone: z.string().optional(),
-  silent: z.boolean().optional(),
-});
+export const createReminderSchema = z
+  .object({
+    message: z.string().min(1, 'Введите текст напоминания').max(1000),
+    frequency: z.enum(['once', 'daily', 'every_other_day', 'specific_days'] as const),
+    time: z.string().min(1, 'Выберите время'),
+    specificDays: z.array(z.number().int().min(0).max(6)).optional(),
+    timezone: z
+      .string()
+      .refine((timezone) => {
+        try {
+          Intl.DateTimeFormat(undefined, { timeZone: timezone });
+          return true;
+        } catch {
+          return false;
+        }
+      }, 'Неверный часовой пояс')
+      .optional(),
+    silent: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.frequency === 'specific_days' && !data.specificDays?.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Выберите хотя бы один день недели',
+        path: ['specificDays'],
+      });
+    }
+
+    if (data.frequency === 'once') {
+      const runAt = new Date(data.time);
+      if (Number.isNaN(runAt.getTime())) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Введите корректные дату и время',
+          path: ['time'],
+        });
+      } else if (runAt.getTime() <= Date.now()) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Дата и время должны быть в будущем',
+          path: ['time'],
+        });
+      }
+    } else if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(data.time)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Введите время в формате ЧЧ:ММ',
+        path: ['time'],
+      });
+    }
+  });
 
 export type CreateReminderInput = z.infer<typeof createReminderSchema>;

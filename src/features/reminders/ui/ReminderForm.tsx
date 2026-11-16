@@ -50,7 +50,11 @@ const convertIsoToDateTimeLocal = (isoString: string): string => {
 
 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFormSubmit, onDirtyChange }) => {
+export const ReminderForm: React.FC<ReminderFormProps> = ({
+  reminderToEdit,
+  onFormSubmit,
+  onDirtyChange,
+}) => {
   const isEditMode = !!reminderToEdit;
 
   const {
@@ -91,7 +95,13 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         silent: reminderToEdit.silent === true,
       });
     } else {
-      reset({ message: '', frequency: 'once', time: getInitialDateTimeLocal(), specificDays: [], silent: false });
+      reset({
+        message: '',
+        frequency: 'once',
+        time: getInitialDateTimeLocal(),
+        specificDays: [],
+        silent: false,
+      });
     }
   }, [reminderToEdit, reset]);
 
@@ -140,7 +150,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         ...data,
         time: data.frequency === 'once' ? new Date(data.time).toISOString() : data.time,
         specificDays: data.frequency === 'specific_days' ? data.specificDays : undefined,
-        timezone: userTimezone,
+        timezone: reminderToEdit ? (reminderToEdit.timezone ?? 'UTC') : userTimezone,
         silent: data.silent === true,
       };
 
@@ -161,13 +171,18 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
           <Controller
             name="message"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <FormItem
                 top="Что напомнить"
                 status={errors.message ? 'error' : 'default'}
                 bottom={errors.message?.message}
               >
-                <Textarea {...field} placeholder="Введите текст сообщения..." value={field.value || ''} />
+                <Textarea
+                  {...field}
+                  slotProps={{ textArea: { getRootRef: ref } }}
+                  placeholder="Введите текст сообщения..."
+                  value={field.value || ''}
+                />
               </FormItem>
             )}
           />
@@ -195,7 +210,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
           <Controller
             name="time"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <FormItem
                 top="Время"
                 status={errors.time ? 'error' : 'default'}
@@ -204,6 +219,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
                 <Input
                   key={currentFrequency === 'once' ? 'datetime-node-stable' : 'time-node-stable'}
                   {...field}
+                  slotProps={{ input: { getRootRef: ref } }}
                   type={currentFrequency === 'once' ? 'datetime-local' : 'time'}
                 />
               </FormItem>
@@ -212,7 +228,11 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
         </Group>
 
         {currentFrequency === 'specific_days' && (
-          <DaysOfWeekPicker selectedDays={currentSpecificDays} onToggle={handleDayToggle} />
+          <DaysOfWeekPicker
+            selectedDays={currentSpecificDays}
+            onToggle={handleDayToggle}
+            error={errors.specificDays?.message}
+          />
         )}
 
         <Group mode="card">
@@ -223,7 +243,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
               <SimpleCell
                 after={
                   <span style={{ pointerEvents: 'none' }}>
-                    <Switch checked={!!field.value} />
+                    <Switch checked={!!field.value} readOnly />
                   </span>
                 }
                 onClick={() => {
@@ -239,13 +259,7 @@ export const ReminderForm: React.FC<ReminderFormProps> = ({ reminderToEdit, onFo
       </div>
 
       <BottomActionBar>
-        <Button
-          size="l"
-          stretched
-          loading={isSubmitting}
-          type="submit"
-          before={<Save size={16} />}
-        >
+        <Button size="l" stretched loading={isSubmitting} type="submit" before={<Save size={16} />}>
           {isEditMode ? 'Сохранить изменения' : 'Создать'}
         </Button>
       </BottomActionBar>

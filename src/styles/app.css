@@ -8,3 +8,13 @@
   border-top-left-radius: var(--vkui--size_border_radius_promo--regular);
   border-top-right-radius: var(--vkui--size_border_radius_promo--regular);
 }
+
+@media (pointer: coarse) {
+  :where(button, [role='button'], input, select, textarea) {
+    min-block-size: 48px;
+  }
+
+  :where(button, [role='button']) {
+    min-inline-size: 48px;
+  }
+}

@@ -4,7 +4,7 @@ services:
     container_name: beptyxa-frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_BIND:-127.0.0.1}:18443:444"
+      - '${FRONTEND_BIND:-127.0.0.1}:18443:444'
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     environment:

@@ -1,23 +1,21 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Alert } from '@vkontakte/vkui';
 import { ReminderForm } from '@/features/reminders/ui/ReminderForm';
 import { ReminderSteamDetails } from '@/features/reminders/ui/ReminderSteamDetails';
 import { useUpdateReminders } from '@/features/reminders/hooks/useUpdateReminders.ts';
 import { useCreateReminders } from '@/features/reminders/hooks/useCreateReminders.ts';
-import {
-  type Reminder,
-  type CreateReminderInput,
-} from '@/features/reminders/model/reminders.types';
+import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
+import type { CreateReminderInput } from '@/features/reminders/model/reminders.types.ts';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
 import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
+import { FormPageState } from '@/shared/ui/FormPageState/FormPageState.tsx';
 
 export const ReminderFormPage: React.FC = () => {
   const chatId = getChatId();
-
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
   const feedback = useFeedback();
 
   const isDirtyRef = useRef(false);
@@ -35,21 +33,21 @@ export const ReminderFormPage: React.FC = () => {
     }
   });
 
-  const state = location.state as { reminder?: Reminder } | null;
-  const reminderToEdit = state?.reminder ?? null;
+  const { data, isLoading, isError, refetch } = useGetReminders(chatId);
+  const reminderToEdit = id ? (data?.find((reminder) => reminder._id === id) ?? null) : null;
 
   const { mutateAsync: createReminder } = useCreateReminders(chatId);
   const { mutateAsync: editReminder } = useUpdateReminders(chatId);
 
-  const handleFormSubmit = async (data: CreateReminderInput, id?: string) => {
+  const handleFormSubmit = async (formData: CreateReminderInput, entityId?: string) => {
     try {
-      if (id) {
-        await editReminder({ id, data });
+      if (entityId) {
+        await editReminder({ id: entityId, data: formData });
       } else {
-        await createReminder(data);
+        await createReminder(formData);
       }
       isDirtyRef.current = false;
-      feedback.success(id ? 'Напоминание обновлено' : 'Напоминание создано');
+      feedback.success(entityId ? 'Напоминание обновлено' : 'Напоминание создано');
       goBack();
     } catch (err) {
       console.error(err);
@@ -57,7 +55,19 @@ export const ReminderFormPage: React.FC = () => {
     }
   };
 
-  // Напоминания о выходе игры нельзя редактировать — показываем только просмотр
+  if (id && (isLoading || isError || !reminderToEdit)) {
+    return (
+      <FormPageState
+        isLoading={isLoading}
+        isError={isError}
+        notFound={!reminderToEdit}
+        entityName="Напоминание"
+        onRetry={() => void refetch()}
+        onBack={goBack}
+      />
+    );
+  }
+
   if (reminderToEdit?.kind === 'steam_release') {
     return <ReminderSteamDetails reminder={reminderToEdit} />;
   }

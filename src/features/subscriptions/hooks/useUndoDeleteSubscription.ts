@@ -1,43 +1,38 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useDeleteSubscription } from './useDeleteSubscription.ts';
-import { markPendingDeletion, unmarkPendingDeletion } from '../model/pendingDeletions.ts';
+import { markPendingDeletion, unmarkPendingDeletions } from '../model/pendingDeletions.ts';
 import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
+import { createUndoDeleteScheduler } from '@/shared/utils/undoDeleteScheduler';
 
 const UNDO_DELAY = 4000;
 const UNDO_SNACKBAR_DURATION = UNDO_DELAY - 600;
+const pending = new Map<string, ReturnType<typeof setTimeout>>();
 
 export const useUndoDeleteSubscription = (chatId: number | undefined) => {
-  const { mutate: deleteSubscription } = useDeleteSubscription(chatId);
+  const { mutateAsync: deleteSubscription } = useDeleteSubscription(chatId);
   const feedback = useFeedback();
+  const [scheduler] = useState(() =>
+    createUndoDeleteScheduler({
+      delayMs: UNDO_DELAY,
+      onDelete: deleteSubscription,
+      pending,
+      onError: (id) => {
+        unmarkPendingDeletions([id]);
+        feedback.error('Не удалось удалить подписку');
+      },
+    }),
+  );
 
   return useCallback(
     (id: string) => {
       markPendingDeletion(id);
-
-      let undone = false;
-      let fired = false;
-      const timer = setTimeout(() => {
-        if (undone) return;
-        fired = true;
-        deleteSubscription(id, {
-          onError: () => {
-            unmarkPendingDeletion(id);
-            feedback.error('Не удалось удалить подписку');
-          },
-        });
-      }, UNDO_DELAY);
-
+      scheduler.schedule(id);
       feedback.undo(
         'Подписка удалена',
-        () => {
-          if (fired) return;
-          undone = true;
-          clearTimeout(timer);
-          unmarkPendingDeletion(id);
-        },
+        () => unmarkPendingDeletions(scheduler.cancelPending()),
         UNDO_SNACKBAR_DURATION,
       );
     },
-    [deleteSubscription, feedback],
+    [feedback, scheduler],
   );
 };

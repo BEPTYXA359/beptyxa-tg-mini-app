@@ -27,7 +27,8 @@ export const ConverterPage: React.FC = () => {
           value={tab}
           options={TAB_OPTIONS}
           onChange={(value) => setTab(value as ConverterTab)}
-        />      </FormItem>
+        />{' '}
+      </FormItem>
 
       {tab === 'currency' ? <CurrencyConverter /> : <UnitsConverter />}
     </Group>

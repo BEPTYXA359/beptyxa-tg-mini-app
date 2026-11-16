@@ -39,7 +39,11 @@ export const SettingsPage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <Group mode="card" header={<Header>AI-чат</Header>}>
         <MenuItem icon={<Bot size={24} />} label="Настройки LLM" path="/llm-settings" />
-        <MenuItem icon={<Drama size={24} />} label="Настройки Балабола" path="/chatterbox-settings" />
+        <MenuItem
+          icon={<Drama size={24} />}
+          label="Настройки Балабола"
+          path="/chatterbox-settings"
+        />
         <MenuItem icon={<BarChart3 size={24} />} label="Статистика LLM" path="/llm-usage" />
       </Group>
       <Group mode="card" header={<Header>Конвертер и Steam</Header>}>

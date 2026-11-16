@@ -1,5 +1,13 @@
 import React, { useMemo } from 'react';
-import { Avatar, Group, Header, IconButton, Placeholder, SimpleCell, Button } from '@vkontakte/vkui';
+import {
+  Avatar,
+  Group,
+  Header,
+  IconButton,
+  Placeholder,
+  SimpleCell,
+  Button,
+} from '@vkontakte/vkui';
 import { Bell, Gamepad2, Trash } from 'lucide-react';
 import type { Reminder } from '@/features/reminders/model/reminders.types.ts';
 import { getNextFireDate, getNextFireLabel } from '../utils/nextFire';
@@ -49,7 +57,10 @@ const formatAuthor = (item: Reminder): string =>
 const formatSubscribers = (item: Reminder): string => {
   const subscribers = item.subscribers ?? [];
   if (subscribers.length === 0) return 'Steam';
-  const shown = subscribers.slice(0, MAX_SHOWN_SUBSCRIBERS).map((s) => s.firstName).join(', ');
+  const shown = subscribers
+    .slice(0, MAX_SHOWN_SUBSCRIBERS)
+    .map((s) => s.firstName)
+    .join(', ');
   const rest = subscribers.length - MAX_SHOWN_SUBSCRIBERS;
   return `Steam · Уведомим: ${shown}${rest > 0 ? ` и ещё ${rest}` : ''}`;
 };
@@ -109,11 +120,13 @@ export const RemindersList: React.FC<RemindersListProps> = ({
             data-id={item._id}
             before={typeAvatar(item)}
             subtitle={nextFire ? `Ближайшее: ${nextFire}` : formatFrequency(item)}
-            extraSubtitle={isSteam ? formatSubscribers(item) : `${formatFrequency(item)} · ${formatAuthor(item)}`}
+            extraSubtitle={
+              isSteam ? formatSubscribers(item) : `${formatFrequency(item)} · ${formatAuthor(item)}`
+            }
             after={
               <IconButton
                 label="Удалить напоминание"
-                style={{ width: 36, height: 36, flex: 'none' }}
+                style={{ width: 48, height: 48, flex: 'none' }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(item._id);
@@ -125,7 +138,7 @@ export const RemindersList: React.FC<RemindersListProps> = ({
             multiline
             onClick={() => (isSteam ? onView(item) : onEdit(item))}
           >
-            {isSteam ? (item.gameName || item.message) : item.message}
+            {isSteam ? item.gameName || item.message : item.message}
           </SimpleCell>
         );
       })}

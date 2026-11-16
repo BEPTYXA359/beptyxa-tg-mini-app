@@ -12,7 +12,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
 import { haptic } from '@/shared/utils/haptic.util';
 import { PlatesListSkeleton } from '@/shared/ui/Skeleton/PlatesListSkeleton.tsx';
-import { BottomActionBar, BOTTOM_BAR_CLEARANCE } from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
+import {
+  BottomActionBar,
+  BOTTOM_BAR_CLEARANCE,
+} from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
 
 export const PlatesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -52,7 +55,7 @@ export const PlatesPage: React.FC = () => {
   }, [refetch]);
 
   const handleOpenPlate = (plate: Plate) => {
-    void navigate('/plates/form', { state: { plate } });
+    void navigate(`/plates/${plate._id}/edit`);
   };
 
   if (isLoading) {
@@ -62,7 +65,10 @@ export const PlatesPage: React.FC = () => {
   if (isError) {
     return (
       <Group>
-        <Placeholder title="Ошибка" action={<Button onClick={() => void refetch()}>Повторить</Button>}>
+        <Placeholder
+          title="Ошибка"
+          action={<Button onClick={() => void refetch()}>Повторить</Button>}
+        >
           Не удалось загрузить номера
         </Placeholder>
       </Group>
@@ -76,7 +82,7 @@ export const PlatesPage: React.FC = () => {
           <PlatesList
             items={plates}
             onEdit={handleOpenPlate}
-            onCreate={() => void navigate('/plates/form')}
+            onCreate={() => void navigate('/plates/new')}
           />
         </PullToRefresh>
       </div>
@@ -87,7 +93,7 @@ export const PlatesPage: React.FC = () => {
           stretched
           onClick={() => {
             haptic.impact('light');
-            void navigate('/plates/form');
+            void navigate('/plates/new');
           }}
         >
           Добавить номер

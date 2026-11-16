@@ -92,7 +92,10 @@ const LlmSettingsForm: React.FC<{ initialSettings: ChatSettings; chatId?: number
         reset({
           ...data,
           providers: Object.fromEntries(
-            Object.entries(data.providers ?? {}).map(([id, entry]) => [id, { ...entry, apiKey: '' }]),
+            Object.entries(data.providers ?? {}).map(([id, entry]) => [
+              id,
+              { ...entry, apiKey: '' },
+            ]),
           ),
         });
       },

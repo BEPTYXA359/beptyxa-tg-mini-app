@@ -19,7 +19,8 @@ export const PlatesList: React.FC<PlatesListProps> = ({ items, onEdit, onCreate 
     const normalizedQuery = normalizePlate(trimmed);
     const lowerQuery = trimmed.toLowerCase();
     return items.filter(
-      (item) => item.plate.includes(normalizedQuery) || item.name.toLowerCase().includes(lowerQuery),
+      (item) =>
+        item.plate.includes(normalizedQuery) || item.name.toLowerCase().includes(lowerQuery),
     );
   }, [items, query]);
 

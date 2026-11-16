@@ -1,4 +1,4 @@
 dist
 node_modules
 .npm
-public
+src/features/plates/ui/plateGlyphs.generated.ts

@@ -13,9 +13,9 @@ interface RemindersWidgetProps {
 export const RemindersWidget: React.FC<RemindersWidgetProps> = ({ onClick, reminders }) => {
   const { count, subtitle } = useMemo(() => {
     const nextDates = reminders
-      .map((r) => getNextFireDate(r))
-      .filter((d): d is Date => d !== null)
-      .sort((a, b) => a.getTime() - b.getTime());
+      .map((reminder) => ({ date: getNextFireDate(reminder), timezone: reminder.timezone }))
+      .filter((entry): entry is { date: Date; timezone: string | undefined } => entry.date !== null)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     const soonest = nextDates[0];
     if (reminders.length === 0) {
@@ -23,7 +23,9 @@ export const RemindersWidget: React.FC<RemindersWidgetProps> = ({ onClick, remin
     }
     return {
       count: reminders.length,
-      subtitle: soonest ? `Ближайшее: ${formatNextFire(soonest)}` : `Активных: ${reminders.length}`,
+      subtitle: soonest
+        ? `Ближайшее: ${formatNextFire(soonest.date, new Date(), soonest.timezone)}`
+        : `Активных: ${reminders.length}`,
     };
   }, [reminders]);
 
@@ -31,10 +33,7 @@ export const RemindersWidget: React.FC<RemindersWidgetProps> = ({ onClick, remin
     <Banner
       mode="tint"
       before={
-        <Avatar
-          size={40}
-          style={{ background: 'var(--vkui--color_background_accent)' }}
-        >
+        <Avatar size={40} style={{ background: 'var(--vkui--color_background_accent)' }}>
           <BellRing size={20} color="var(--vkui--color_background_contrast)" />
         </Avatar>
       }

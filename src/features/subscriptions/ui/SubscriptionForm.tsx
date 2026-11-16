@@ -131,6 +131,8 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
               key={preset.name}
               mode={activePresetName === preset.name.toLowerCase() ? 'primary' : 'secondary'}
               size="s"
+              type="button"
+              style={{ minHeight: 48 }}
               before={
                 <span
                   style={{
@@ -157,13 +159,18 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <Controller
           name="name"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Название"
               status={errors.name ? 'error' : 'default'}
               bottom={errors.name?.message}
             >
-              <Input {...field} placeholder="Например, Netflix" value={field.value || ''} />
+              <Input
+                {...field}
+                slotProps={{ input: { getRootRef: ref } }}
+                placeholder="Например, Netflix"
+                value={field.value || ''}
+              />
             </FormItem>
           )}
         />
@@ -171,13 +178,18 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <Controller
           name="service"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Сервис"
               status={errors.service ? 'error' : 'default'}
               bottom={errors.service?.message ?? 'Необязательно, например «Яндекс»'}
             >
-              <Input {...field} placeholder="Яндекс" value={field.value || ''} />
+              <Input
+                {...field}
+                slotProps={{ input: { getRootRef: ref } }}
+                placeholder="Яндекс"
+                value={field.value || ''}
+              />
             </FormItem>
           )}
         />
@@ -185,7 +197,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <Controller
           name="cost"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Стоимость"
               status={errors.cost ? 'error' : 'default'}
@@ -193,6 +205,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             >
               <Input
                 {...field}
+                slotProps={{ input: { getRootRef: ref } }}
                 type="text"
                 inputMode="decimal"
                 placeholder="9.99"
@@ -205,7 +218,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <Controller
           name="currency"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Валюта"
               status={errors.currency ? 'error' : 'default'}
@@ -213,6 +226,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             >
               <CustomSelect
                 {...field}
+                slotProps={{ input: { getRootRef: ref } }}
                 options={CURRENCY_OPTIONS}
                 value={field.value}
                 onChange={(e) => field.onChange(e.target.value)}
@@ -242,7 +256,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
         <Controller
           name="nextPaymentDate"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Дата следующего списания"
               status={errors.nextPaymentDate ? 'error' : 'default'}
@@ -250,6 +264,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
             >
               <Input
                 {...field}
+                slotProps={{ input: { getRootRef: ref } }}
                 type="date"
                 value={field.value || ''}
                 onChange={(e) => field.onChange(e.target.value)}
@@ -315,8 +330,8 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
                 setValue('color', '', { shouldDirty: true });
               }}
               style={{
-                width: 32,
-                height: 32,
+                width: 48,
+                height: 48,
                 borderRadius: '50%',
                 border: `2px ${selectedColor === '' ? 'solid var(--vkui--color_stroke_accent)' : 'dashed var(--vkui--color_icon_secondary)'}`,
                 background: 'transparent',
@@ -334,8 +349,8 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
                   setValue('color', color, { shouldDirty: true });
                 }}
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 48,
+                  height: 48,
                   borderRadius: '50%',
                   background: color,
                   border: `2px solid ${selectedColor === color ? 'var(--vkui--color_stroke_accent)' : 'transparent'}`,
@@ -378,6 +393,7 @@ export const SubscriptionForm: React.FC<SubscriptionFormProps> = ({
           <Button
             size="l"
             stretched
+            type="button"
             mode="secondary"
             appearance="negative"
             before={<Trash size={16} />}

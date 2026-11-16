@@ -1,24 +1,22 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Alert } from '@vkontakte/vkui';
 import { isAxiosError } from 'axios';
 import { SubscriptionForm } from '@/features/subscriptions/ui/SubscriptionForm.tsx';
 import { useUpdateSubscription } from '@/features/subscriptions/hooks/useUpdateSubscription.ts';
 import { useCreateSubscription } from '@/features/subscriptions/hooks/useCreateSubscription.ts';
 import { useUndoDeleteSubscription } from '@/features/subscriptions/hooks/useUndoDeleteSubscription.ts';
-import type {
-  Subscription,
-  SubscriptionPayload,
-} from '@/features/subscriptions/model/subscriptions.types.ts';
+import { useGetSubscriptions } from '@/features/subscriptions/hooks/useGetSubscriptions.ts';
+import type { SubscriptionPayload } from '@/features/subscriptions/model/subscriptions.types.ts';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
 import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
+import { FormPageState } from '@/shared/ui/FormPageState/FormPageState.tsx';
 
 export const SubscriptionFormPage: React.FC = () => {
   const chatId = getChatId();
-
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams();
   const feedback = useFeedback();
 
   const isDirtyRef = useRef(false);
@@ -36,22 +34,24 @@ export const SubscriptionFormPage: React.FC = () => {
     }
   });
 
-  const state = location.state as { subscription?: Subscription } | null;
-  const subscriptionToEdit = state?.subscription ?? null;
+  const { data, isLoading, isError, refetch } = useGetSubscriptions(chatId);
+  const subscriptionToEdit = id
+    ? (data?.find((subscription) => subscription._id === id) ?? null)
+    : null;
 
   const { mutateAsync: createSubscription } = useCreateSubscription(chatId);
   const { mutateAsync: editSubscription } = useUpdateSubscription(chatId);
   const deleteWithUndo = useUndoDeleteSubscription(chatId);
 
-  const handleFormSubmit = async (data: SubscriptionPayload, id?: string) => {
+  const handleFormSubmit = async (formData: SubscriptionPayload, entityId?: string) => {
     try {
-      if (id) {
-        await editSubscription({ id, data });
+      if (entityId) {
+        await editSubscription({ id: entityId, data: formData });
       } else {
-        await createSubscription(data);
+        await createSubscription(formData);
       }
       isDirtyRef.current = false;
-      feedback.success(id ? 'Подписка обновлена' : 'Подписка добавлена');
+      feedback.success(entityId ? 'Подписка обновлена' : 'Подписка добавлена');
       goBack();
     } catch (err) {
       if (isAxiosError<{ error: string }>(err) && err.response?.data?.error) {
@@ -69,6 +69,19 @@ export const SubscriptionFormPage: React.FC = () => {
     deleteWithUndo(subscriptionToEdit._id);
     goBack();
   }, [subscriptionToEdit, deleteWithUndo, goBack]);
+
+  if (id && (isLoading || isError || !subscriptionToEdit)) {
+    return (
+      <FormPageState
+        isLoading={isLoading}
+        isError={isError}
+        notFound={!subscriptionToEdit}
+        entityName="Подписка"
+        onRetry={() => void refetch()}
+        onBack={goBack}
+      />
+    );
+  }
 
   return (
     <>

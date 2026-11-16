@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { AppRoot, ConfigProvider } from '@vkontakte/vkui';
 
 import '@vkontakte/vkui/dist/vkui.css';
@@ -7,23 +7,10 @@ import '@fontsource/roboto-mono/400.css';
 import '@fontsource/roboto-mono/600.css';
 import './styles/app.css';
 
+import { AppRoutes } from '@/app/AppRoutes';
 import { useTgAppearance } from '@/shared/hooks/useTgAppearance';
 import { FeedbackProvider } from '@/shared/ui/Feedback/FeedbackProvider';
-import { Layout } from '@/shared/ui/Layout/Layout';
-import { HomePage } from '@/pages/HomePage/HomePage';
-import { SettingsPage } from '@/pages/SettingsPage/SettingsPage';
-import { RemindersPage } from '@/pages/RemindersPage/RemindersPage';
-import { ReminderFormPage } from '@/pages/ReminderFormPage/ReminderFormPage';
-import { PlatesPage } from '@/pages/PlatesPage/PlatesPage';
-import { PlateFormPage } from '@/pages/PlateFormPage/PlateFormPage';
-import { SubscriptionsPage } from '@/pages/SubscriptionsPage/SubscriptionsPage';
-import { SubscriptionFormPage } from '@/pages/SubscriptionFormPage/SubscriptionFormPage';
-import { ConverterPage } from '@/pages/ConverterPage/ConverterPage';
-import { ConversionSettingsPage } from '@/pages/ConversionSettingsPage/ConversionSettingsPage';
-import { LlmUsagePage } from '@/pages/LlmUsagePage/LlmUsagePage';
-import { LlmSettingsPage } from '@/pages/LlmSettingsPage/LlmSettingsPage';
-import { ChatterboxSettingsPage } from '@/pages/ChatterboxSettingsPage/ChatterboxSettingsPage';
-import { SteamSettingsPage } from '@/pages/SteamSettingsPage/SteamSettingsPage';
+import { ErrorBoundary } from '@/shared/ui/ErrorBoundary/ErrorBoundary';
 
 export const App: React.FC = () => {
   const colorScheme = useTgAppearance();
@@ -33,24 +20,9 @@ export const App: React.FC = () => {
       <AppRoot>
         <FeedbackProvider>
           <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/reminders" element={<RemindersPage />} />
-                <Route path="/reminders/form" element={<ReminderFormPage />} />
-                <Route path="/plates" element={<PlatesPage />} />
-                <Route path="/plates/form" element={<PlateFormPage />} />
-                <Route path="/subscriptions" element={<SubscriptionsPage />} />
-                <Route path="/subscriptions/form" element={<SubscriptionFormPage />} />
-                <Route path="/converter" element={<ConverterPage />} />
-                <Route path="/conversion-settings" element={<ConversionSettingsPage />} />
-                <Route path="/llm-settings" element={<LlmSettingsPage />} />
-                <Route path="/chatterbox-settings" element={<ChatterboxSettingsPage />} />
-                <Route path="/steam-settings" element={<SteamSettingsPage />} />
-                <Route path="/llm-usage" element={<LlmUsagePage />} />
-              </Route>
-            </Routes>
+            <ErrorBoundary>
+              <AppRoutes />
+            </ErrorBoundary>
           </BrowserRouter>
         </FeedbackProvider>
       </AppRoot>

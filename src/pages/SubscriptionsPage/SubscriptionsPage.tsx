@@ -78,7 +78,7 @@ export const SubscriptionsPage: React.FC = () => {
   const handleEdit = useCallback(
     (item: Subscription) => {
       haptic.impact('light');
-      void navigate('/subscriptions/form', { state: { subscription: item } });
+      void navigate(`/subscriptions/${item._id}/edit`);
     },
     [navigate],
   );
@@ -131,7 +131,7 @@ export const SubscriptionsPage: React.FC = () => {
             rates={rates}
             onDelete={handleDelete}
             onEdit={handleEdit}
-            onCreate={() => void navigate('/subscriptions/form')}
+            onCreate={() => void navigate('/subscriptions/new')}
           />
           <SubscriptionsList
             title="На паузе"
@@ -141,7 +141,7 @@ export const SubscriptionsPage: React.FC = () => {
             rates={rates}
             onDelete={handleDelete}
             onEdit={handleEdit}
-            onCreate={() => void navigate('/subscriptions/form')}
+            onCreate={() => void navigate('/subscriptions/new')}
           />
         </PullToRefresh>
       </div>
@@ -152,7 +152,7 @@ export const SubscriptionsPage: React.FC = () => {
           stretched
           onClick={() => {
             haptic.impact('light');
-            void navigate('/subscriptions/form');
+            void navigate('/subscriptions/new');
           }}
         >
           Добавить подписку

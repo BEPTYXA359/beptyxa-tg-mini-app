@@ -3,11 +3,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, FormItem, Group, Header, Input } from '@vkontakte/vkui';
 import { Save, Trash } from 'lucide-react';
-import {
-  type CreatePlateInput,
-  createPlateSchema,
-  type Plate,
-} from '../model/plates.types.ts';
+import { type CreatePlateInput, createPlateSchema, type Plate } from '../model/plates.types.ts';
 import { normalizePlate } from '../utils/plateFormat.ts';
 import { PlateCard } from './PlateCard.tsx';
 
@@ -18,7 +14,12 @@ interface PlateFormProps {
   onDelete?: () => void;
 }
 
-export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit, onDirtyChange, onDelete }) => {
+export const PlateForm: React.FC<PlateFormProps> = ({
+  plateToEdit,
+  onFormSubmit,
+  onDirtyChange,
+  onDelete,
+}) => {
   const isEditMode = !!plateToEdit;
 
   const {
@@ -37,9 +38,7 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
 
   useEffect(() => {
     reset(
-      plateToEdit
-        ? { plate: plateToEdit.plate, name: plateToEdit.name }
-        : { plate: '', name: '' },
+      plateToEdit ? { plate: plateToEdit.plate, name: plateToEdit.name } : { plate: '', name: '' },
     );
   }, [plateToEdit, reset]);
 
@@ -67,7 +66,7 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
         <Controller
           name="plate"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Номер автомобиля"
               status={errors.plate ? 'error' : 'default'}
@@ -75,6 +74,7 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
             >
               <Input
                 {...field}
+                slotProps={{ input: { getRootRef: ref } }}
                 placeholder="А123ВС77"
                 value={field.value || ''}
                 autoCapitalize="characters"
@@ -87,13 +87,18 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
         <Controller
           name="name"
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <FormItem
               top="Имя владельца"
               status={errors.name ? 'error' : 'default'}
               bottom={errors.name?.message}
             >
-              <Input {...field} placeholder="Например, Витя" value={field.value || ''} />
+              <Input
+                {...field}
+                slotProps={{ input: { getRootRef: ref } }}
+                placeholder="Например, Витя"
+                value={field.value || ''}
+              />
             </FormItem>
           )}
         />
@@ -114,19 +119,14 @@ export const PlateForm: React.FC<PlateFormProps> = ({ plateToEdit, onFormSubmit,
       </Group>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
-        <Button
-          size="l"
-          stretched
-          type="submit"
-          loading={isSubmitting}
-          before={<Save size={16} />}
-        >
+        <Button size="l" stretched type="submit" loading={isSubmitting} before={<Save size={16} />}>
           {isEditMode ? 'Сохранить изменения' : 'Добавить'}
         </Button>
         {isEditMode && onDelete && (
           <Button
             size="l"
             stretched
+            type="button"
             mode="secondary"
             appearance="negative"
             before={<Trash size={16} />}

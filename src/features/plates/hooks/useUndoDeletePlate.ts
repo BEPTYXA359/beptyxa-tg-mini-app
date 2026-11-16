@@ -1,43 +1,38 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useDeletePlate } from './useDeletePlate.ts';
-import { markPendingDeletion, unmarkPendingDeletion } from '../model/pendingDeletions.ts';
+import { markPendingDeletion, unmarkPendingDeletions } from '../model/pendingDeletions.ts';
 import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
+import { createUndoDeleteScheduler } from '@/shared/utils/undoDeleteScheduler';
 
 const UNDO_DELAY = 4000;
 const UNDO_SNACKBAR_DURATION = UNDO_DELAY - 600;
+const pending = new Map<string, ReturnType<typeof setTimeout>>();
 
 export const useUndoDeletePlate = (chatId: number | undefined) => {
-  const { mutate: deletePlate } = useDeletePlate(chatId);
+  const { mutateAsync: deletePlate } = useDeletePlate(chatId);
   const feedback = useFeedback();
+  const [scheduler] = useState(() =>
+    createUndoDeleteScheduler({
+      delayMs: UNDO_DELAY,
+      onDelete: deletePlate,
+      pending,
+      onError: (id) => {
+        unmarkPendingDeletions([id]);
+        feedback.error('Не удалось удалить номер');
+      },
+    }),
+  );
 
   return useCallback(
     (id: string) => {
       markPendingDeletion(id);
-
-      let undone = false;
-      let fired = false;
-      const timer = setTimeout(() => {
-        if (undone) return;
-        fired = true;
-        deletePlate(id, {
-          onError: () => {
-            unmarkPendingDeletion(id);
-            feedback.error('Не удалось удалить номер');
-          },
-        });
-      }, UNDO_DELAY);
-
+      scheduler.schedule(id);
       feedback.undo(
         'Номер удалён',
-        () => {
-          if (fired) return;
-          undone = true;
-          clearTimeout(timer);
-          unmarkPendingDeletion(id);
-        },
+        () => unmarkPendingDeletions(scheduler.cancelPending()),
         UNDO_SNACKBAR_DURATION,
       );
     },
-    [deletePlate, feedback],
+    [feedback, scheduler],
   );
 };

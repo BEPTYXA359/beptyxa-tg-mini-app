@@ -105,7 +105,7 @@ export const SubscriptionsList: React.FC<SubscriptionsListProps> = ({
                 )}
                 <IconButton
                   label="Удалить подписку"
-                  style={{ width: 36, height: 36 }}
+                  style={{ width: 48, height: 48 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(item._id);

@@ -1,6 +1,14 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CustomSelect, FormItem, Group, Header, Placeholder, Slider, Spinner } from '@vkontakte/vkui';
+import {
+  CustomSelect,
+  FormItem,
+  Group,
+  Header,
+  Placeholder,
+  Slider,
+  Spinner,
+} from '@vkontakte/vkui';
 import { useGetConversionSettings } from '@/features/conversion-settings/hooks/useGetConversionSettings';
 import { useUpdateConversionSettings } from '@/features/conversion-settings/hooks/useUpdateConversionSettings';
 import {
@@ -90,9 +98,7 @@ export const SteamSettingsPage: React.FC = () => {
         <CustomSelect
           value={settings.steam.ratesSource ?? 'openexchangerates'}
           options={CONVERTER_SOURCE_OPTIONS}
-          onChange={(e) =>
-            save({ steam: { ratesSource: e.target.value as ConverterSource } })
-          }
+          onChange={(e) => save({ steam: { ratesSource: e.target.value as ConverterSource } })}
         />
       </FormItem>
       <FormItem top="Регион игры">

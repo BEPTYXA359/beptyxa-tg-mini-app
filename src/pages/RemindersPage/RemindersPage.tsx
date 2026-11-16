@@ -1,30 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Group, Placeholder, PullToRefresh } from '@vkontakte/vkui';
 import { RemindersList } from '@/features/reminders/ui/RemindersList';
-import { useDeleteReminders } from '@/features/reminders/hooks/useDeleteReminders.ts';
 import {
-  markPendingDeletion,
-  unmarkPendingDeletion,
   unmarkPendingDeletions,
   usePendingDeletionIds,
 } from '@/features/reminders/model/pendingDeletions.ts';
 import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
+import { useUndoDeleteReminder } from '@/features/reminders/hooks/useUndoDeleteReminder';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import type { Reminder } from '@/features/reminders/model/reminders.types.ts';
 import { useNavigate } from 'react-router-dom';
 import { useTelegramBackButton } from '@/shared/hooks/useTelegramBackButton.ts';
-import { useFeedback } from '@/shared/ui/Feedback/feedback.ts';
 import { haptic } from '@/shared/utils/haptic.util';
 import { RemindersListSkeleton } from '@/shared/ui/Skeleton/RemindersListSkeleton.tsx';
-import { BottomActionBar, BOTTOM_BAR_CLEARANCE } from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
-
-const UNDO_DELAY = 4000;
-// снекбар начинает отсчёт после анимации появления, поэтому гасим его до отправки DELETE
-const UNDO_SNACKBAR_DURATION = UNDO_DELAY - 600;
+import {
+  BottomActionBar,
+  BOTTOM_BAR_CLEARANCE,
+} from '@/shared/ui/BottomActionBar/BottomActionBar.tsx';
 
 export const RemindersPage: React.FC = () => {
   const navigate = useNavigate();
-  const feedback = useFeedback();
 
   useTelegramBackButton(() => {
     void navigate('/');
@@ -33,7 +28,7 @@ export const RemindersPage: React.FC = () => {
   const chatId = getChatId();
 
   const { data, isLoading, isError, isFetching, refetch } = useGetReminders(chatId);
-  const { mutate: deleteReminder } = useDeleteReminders(chatId);
+  const deleteWithUndo = useUndoDeleteReminder(chatId);
 
   const pendingIds = usePendingDeletionIds();
   const reminders = useMemo(
@@ -41,7 +36,6 @@ export const RemindersPage: React.FC = () => {
     [data, pendingIds],
   );
 
-  // удаление подтверждено сервером, когда очередной ответ больше не содержит id
   useEffect(() => {
     if (data === undefined) return;
     const serverIds = new Set(data.map((reminder) => reminder._id));
@@ -63,39 +57,8 @@ export const RemindersPage: React.FC = () => {
   }, [refetch]);
 
   const handleOpenReminder = (reminder: Reminder) => {
-    void navigate('/reminders/form', { state: { reminder } });
+    void navigate(`/reminders/${reminder._id}/edit`);
   };
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      markPendingDeletion(id);
-
-      let undone = false;
-      let fired = false;
-      const timer = setTimeout(() => {
-        if (undone) return;
-        fired = true;
-        deleteReminder(id, {
-          onError: () => {
-            unmarkPendingDeletion(id);
-            feedback.error('Не удалось удалить напоминание');
-          },
-        });
-      }, UNDO_DELAY);
-
-      feedback.undo(
-        'Напоминание удалено',
-        () => {
-          if (fired) return;
-          undone = true;
-          clearTimeout(timer);
-          unmarkPendingDeletion(id);
-        },
-        UNDO_SNACKBAR_DURATION,
-      );
-    },
-    [deleteReminder, feedback],
-  );
 
   if (isLoading) {
     return <RemindersListSkeleton />;
@@ -120,10 +83,10 @@ export const RemindersPage: React.FC = () => {
         <PullToRefresh isFetching={isRefreshing || isFetching} onRefresh={handleRefresh}>
           <RemindersList
             items={reminders}
-            onDelete={handleDelete}
+            onDelete={deleteWithUndo}
             onEdit={handleOpenReminder}
             onView={handleOpenReminder}
-            onCreate={() => void navigate('/reminders/form')}
+            onCreate={() => void navigate('/reminders/new')}
           />
         </PullToRefresh>
       </div>
@@ -134,7 +97,7 @@ export const RemindersPage: React.FC = () => {
           stretched
           onClick={() => {
             haptic.impact('light');
-            void navigate('/reminders/form');
+            void navigate('/reminders/new');
           }}
         >
           Добавить напоминание
