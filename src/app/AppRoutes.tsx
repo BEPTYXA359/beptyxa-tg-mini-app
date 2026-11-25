@@ -18,6 +18,9 @@ const ConverterPage = lazy(() =>
     default: module.ConverterPage,
   })),
 );
+const F1Page = lazy(() =>
+  import('@/pages/F1Page/F1Page').then((module) => ({ default: module.F1Page })),
+);
 const HomePage = lazy(() =>
   import('@/pages/HomePage/HomePage').then((module) => ({ default: module.HomePage })),
 );
@@ -86,6 +89,8 @@ export const AppRoutes: FC = () => (
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/f1" element={<Navigate to="/f1/calendar" replace />} />
+        <Route path="/f1/:tab" element={<F1Page />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/reminders" element={<RemindersPage />} />
         <Route path="/reminders/new" element={<ReminderFormPage />} />

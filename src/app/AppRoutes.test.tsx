@@ -10,7 +10,10 @@ const { apiGet } = vi.hoisted(() => ({ apiGet: vi.fn() }));
 vi.mock('@/shared/api/api.client', () => ({
   apiClient: { get: apiGet, post: vi.fn(), put: vi.fn(), delete: vi.fn() },
 }));
-vi.mock('@/shared/utils/telegram.util', () => ({ getChatId: () => 1 }));
+vi.mock('@/shared/utils/telegram.util', () => ({
+  getChatId: () => 1,
+  getEffectiveChatId: () => 1,
+}));
 vi.mock('@/shared/hooks/useTelegramBackButton', () => ({
   useTelegramBackButton: () => undefined,
 }));
@@ -45,6 +48,14 @@ beforeEach(() => {
 });
 
 describe('AppRoutes', () => {
+  it('shows Formula 1 on the home page instead of the tab bar', async () => {
+    renderRoute('/');
+
+    expect(await screen.findByText('Формула-1')).toBeInTheDocument();
+    expect(screen.queryByText('Ф1', { exact: true })).not.toBeInTheDocument();
+    expect(screen.getByText('Настройки', { exact: true })).toBeInTheDocument();
+  });
+
   it('opens the plate editor at its persistent URL', async () => {
     renderRoute('/plates/plate-1/edit');
 

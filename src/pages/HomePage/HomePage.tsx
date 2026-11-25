@@ -4,6 +4,7 @@ import { RemindersWidget } from '@/features/reminders/ui/RemindersWidget.tsx';
 import { PlatesWidget } from '@/features/plates/ui/PlatesWidget.tsx';
 import { SubscriptionsWidget } from '@/features/subscriptions/ui/SubscriptionsWidget.tsx';
 import { ConverterWidget } from '@/features/converter/ui/ConverterWidget.tsx';
+import { F1Widget } from '@/features/f1/ui/F1Widget';
 import { getChatId } from '@/shared/utils/telegram.util.ts';
 import { useGetReminders } from '@/features/reminders/hooks/useGetReminders.ts';
 import { usePendingDeletionIds } from '@/features/reminders/model/pendingDeletions.ts';
@@ -83,6 +84,7 @@ export const HomePage: React.FC = () => {
           onClick={() => void navigate('/subscriptions')}
         />
       )}
+      <F1Widget onClick={() => void navigate('/f1')} />
       <ConverterWidget onClick={() => void navigate('/converter')} />
     </div>
   );
